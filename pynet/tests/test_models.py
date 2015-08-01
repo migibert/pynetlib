@@ -7,6 +7,14 @@ class TestNamespace(unittest.TestCase):
         ns = Namespace(name)
         self.assertEqual(ns.name, name)
         self.assertEqual(len(ns.devices), 0)
+        self.assertFalse(ns.is_default())
+
+    def test_init_default(self):
+        name = ''
+        ns = Namespace(name)
+        self.assertEqual(ns.name, name)
+        self.assertEqual(len(ns.devices), 0)
+        self.assertTrue(ns.is_default())
 
 if __name__ == '__main__':
     unittest.main()
