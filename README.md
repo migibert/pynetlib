@@ -1,3 +1,3 @@
 # pynet
 
-Run tests with ```python -m unittest discover```
+Run tests with ```python -m unittest discover``` from root directory
