@@ -1,5 +1,5 @@
 import unittest
-from pynet.pynet import Namespace
+from pynet.models import Namespace, Device
 
 class TestNamespace(unittest.TestCase):
     def test_init(self):
