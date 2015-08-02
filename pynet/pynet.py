@@ -1,3 +1,4 @@
+from __builtin__ import staticmethod
 import subprocess
 from models import Namespace, Device
 
@@ -20,23 +21,40 @@ class NetConf():
 
     def discover_devices(self, namespace):
         output = self._execute_command('ip addr list', namespace)
-        devices = []
-        current_device = None
-        for block in output.split('\n'):
-            if block and block[0].isdigit():
-                if current_device:
-                    devices.append(current_device)
-                firstSplit = block.split(':')
-                id = firstSplit[0]
-                name = firstSplit[1].strip()
-                current_device = Device(id, name)
-        if current_device:
-            devices.append(current_device)
-        return devices
+        return self._parse_ip_result(output)
 
-    def _execute_command(self, command, namespace=None):
+    @staticmethod
+    def _execute_command(command, namespace=None):
         if namespace is None or namespace.is_default():
             cmd = command
         else:
             cmd = 'ip netns exec %s %s' % (namespace.name, command)
         return subprocess.check_output(cmd, shell=True)
+
+    @staticmethod
+    def _parse_ip_result(command_out):
+        devices = []
+        current_device = None
+        for block in command_out.split('\n'):
+            if block and block[0].isdigit():
+                if current_device:
+                    devices.append(current_device)
+                first_split = block.split(':')
+                id = first_split[0]
+                name = first_split[1].strip()
+                current_device = Device(id, name)
+            else:
+                words = block.strip().split(' ')
+                if current_device.inet is None:
+                    current_device.inet = NetConf._find_value(words, 'inet')
+                if current_device.inet6 is None:
+                    current_device.inet6 = NetConf._find_value(words, 'inet6')
+        if current_device:
+            devices.append(current_device)
+        return devices
+
+    @staticmethod
+    def _find_value(values, key):
+        if key in values:
+            return values[values.index(key) + 1]
+        return None

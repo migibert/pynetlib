@@ -13,6 +13,8 @@ class Device():
     def __init__(self, id, name):
         self.id = id
         self.name = name
+        self.inet = None
+        self.inet6 = None
 
     def is_loopback(self):
         return self.name == 'lo'
