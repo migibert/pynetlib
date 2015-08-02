@@ -1,6 +1,7 @@
 import subprocess
 from models import Namespace, Device
 
+
 class NetConf():
     def __init__(self):
         self.namespaces = []
@@ -24,7 +25,7 @@ class NetConf():
         for block in output.split('\n'):
             if block and block[0].isdigit():
                 if current_device:
-	            devices.append(current_device)
+                    devices.append(current_device)
                 firstSplit = block.split(':')
                 id = firstSplit[0]
                 name = firstSplit[1].strip()
@@ -39,4 +40,3 @@ class NetConf():
         else:
             cmd = 'ip netns exec %s %s' % (namespace.name, command)
         return subprocess.check_output(cmd, shell=True)
-
