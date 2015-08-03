@@ -17,6 +17,18 @@ class TestNamespace(unittest.TestCase):
         self.assertEqual(len(ns.devices), 0)
         self.assertTrue(ns.is_default())
 
+    def test_equality(self):
+        name = 'test'
+        id = 'id'
+        dev = Device(id, name)
+        dev.inet = 'inet'
+        dev.inet6 = 'inet6'
+        ns1 = Namespace('namespace')
+        ns1.devices.append(dev)
+        ns2 = Namespace('namespace')
+        ns2.devices.append(dev)
+        self.assertEqual(ns1, ns2)
+
 
 class TestDevice(unittest.TestCase):
     def test_init_device(self):
@@ -37,6 +49,10 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev.name, name)
         self.assertTrue(dev.is_loopback())
 
+    def test_equality(self):
+        dev1 = Device('id', 'name')
+        dev2 = Device('id', 'name')
+        self.assertEqual(dev1, dev2)
 
 if __name__ == '__main__':
     unittest.main()
