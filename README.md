@@ -14,8 +14,6 @@ Pynet is not yet available on Pypi so it has to be installed from git repo: `pip
 You can run tests with ```py.test --pep8 pynet```
 
 ##Roadmap
-- Add address to device via `ip addr add <IP> dev <DEVICE>`
-- Remove address from device via `ip addr del <IP> dev <DEVICE>`
 - Enable network interface via `ip link set <DEVICE> up`
 - Disable network interface via `ip link set <DEVICE> down`
 - List routes via `ip route show`

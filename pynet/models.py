@@ -1,5 +1,6 @@
 from utils import execute_command, find_value
 
+
 class Namespace():
     DEFAULT_NAMESPACE_NAME = ''
 
@@ -21,7 +22,7 @@ class Namespace():
         return namespaces
 
     def __eq__(self, other):
-        return self.name == other.name and self.devices == other.devices
+        return self.name == other.name
 
     def __repr__(self):
         return '[' + self.name + ']'
@@ -37,6 +38,12 @@ class Device():
 
     def is_loopback(self):
         return self.name == 'lo'
+
+    def add_address(self, address):
+        execute_command('ip addr add %s dev %s' % (address, self.name), namespace=self.namespace)
+
+    def remove_address(self, address):
+        execute_command('ip addr del %s dev %s' % (address, self.name), namespace=self.namespace)
 
     @staticmethod
     def discover(namespace=None):
