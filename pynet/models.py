@@ -11,6 +11,19 @@ class Namespace():
     def is_default(self):
         return self.name == Namespace.DEFAULT_NAMESPACE_NAME
 
+    def exists(self):
+        return self in Namespace.discover()
+
+    def create(self):
+        if self.is_default() or self.exists():
+            return
+        execute_command('ip netns add %s' % self.name)
+
+    def delete(self):
+        if self.is_default() or not self.exists():
+            return
+        execute_command('ip netns del %s' % self.name)
+
     @staticmethod
     def discover(with_devices=False):
         default = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
