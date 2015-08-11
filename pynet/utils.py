@@ -1,15 +1,21 @@
 import subprocess
+from pynet.exceptions import ValueNotFoundException
 
 
 def execute_command(command, namespace=None):
-    if namespace is None or namespace.is_default():
+    ns = namespace
+    if hasattr(namespace, 'name'):
+        ns = namespace.name
+    if ns is None or ns == '':
         cmd = command
     else:
-        cmd = 'ip netns exec %s %s' % (namespace.name, command)
+        cmd = 'ip netns exec %s %s' % (ns, command)
     return subprocess.check_output(cmd, shell=True)
 
 
 def find_value(values, key):
     if key in values:
-        return values[values.index(key) + 1]
+        if len(values) > values.index(key) + 1:
+            return values[values.index(key) + 1]
+        raise ValueNotFoundException('Value not found for key %s' % key)
     return None
