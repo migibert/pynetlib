@@ -1,4 +1,5 @@
 from utils import execute_command, find_value
+from exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
 
 
 class Namespace():
@@ -16,12 +17,14 @@ class Namespace():
 
     def create(self):
         if self.is_default() or self.exists():
-            return
+            raise ObjectAlreadyExistsException(self)
         execute_command('ip netns add %s' % self.name)
 
     def delete(self):
-        if self.is_default() or not self.exists():
-            return
+        if self.is_default():
+            raise ForbiddenException('Default namespace deletion is not possible')
+        if not self.exists():
+            raise ObjectNotFoundException(self)
         execute_command('ip netns del %s' % self.name)
 
     @staticmethod
