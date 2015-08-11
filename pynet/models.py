@@ -49,16 +49,20 @@ class Device():
         self.id = id
         self.name = name
         self.namespace = namespace
-        self.inet = None
-        self.inet6 = None
+        self.inet = []
+        self.inet6 = []
 
     def is_loopback(self):
         return self.name == 'lo'
 
     def add_address(self, address):
+        if address in self.inet + self.inet6:
+            raise ObjectAlreadyExistsException(address)
         execute_command('ip addr add %s dev %s' % (address, self.name), namespace=self.namespace)
 
     def remove_address(self, address):
+        if address not in self.inet + self.inet6:
+            raise ObjectNotFoundException(address)
         execute_command('ip addr del %s dev %s' % (address, self.name), namespace=self.namespace)
 
     @staticmethod
@@ -76,10 +80,12 @@ class Device():
                 current_device = Device(id, name, namespace=namespace)
             else:
                 words = block.strip().split(' ')
-                if current_device.inet is None:
-                    current_device.inet = find_value(words, 'inet')
-                if current_device.inet6 is None:
-                    current_device.inet6 = find_value(words, 'inet6')
+                inet = find_value(words, 'inet')
+                if inet is not None:
+                    current_device.inet.append(inet)
+                inet6 = find_value(words, 'inet6')
+                if inet6 is not None:
+                    current_device.inet6.append(inet6)
         if current_device:
             devices.append(current_device)
         return devices

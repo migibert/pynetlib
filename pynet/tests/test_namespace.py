@@ -60,14 +60,14 @@ class TestNamespace(unittest.TestCase):
             self.ip_addr_list_output
         ]
         lo = Device('1', 'lo')
-        lo.inet = '127.0.0.1/8'
-        lo.inet6 = '::1/128'
+        lo.inet = ['127.0.0.1/8']
+        lo.inet6 = ['::1/128']
         eth0 = Device('2', 'eth0')
-        eth0.inet = '10.0.2.15/24'
-        eth0.inet6 = 'fe80::a00:27ff:feea:67cf/64'
+        eth0.inet = ['10.0.2.15/24', '10.0.2.16/24']
+        eth0.inet6 = ['fe80::a00:27ff:feea:67cf/64']
         docker0 = Device('3', 'docker0')
-        docker0.inet = '172.17.42.1/16'
-        docker0.inet6 = None
+        docker0.inet = ['172.17.42.1/16']
+        docker0.inet6 = []
 
         namespaces = Namespace.discover(with_devices=True)
 
