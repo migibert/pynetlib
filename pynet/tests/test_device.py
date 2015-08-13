@@ -121,6 +121,31 @@ class TestDevice(unittest.TestCase):
             dev.remove_address('192.168.10.10/32')
         execute_command.assert_not_called()
 
+    def test_exists_address_from_device(self):
+        address = '192.168.42.42'
+        dev = Device('1', 'eth0')
+        dev.inet = ['10.0.2.15/24', address]
+        dev.inet6 = []
+        self.assertTrue(dev.contains_address(address))
+
+    def test_exists_non_existing_address_from_device(self):
+        dev = Device('1', 'eth0')
+        dev.inet = []
+        dev.inet6 = []
+        self.assertFalse(dev.contains_address('192.168.42.42'))
+
+    def test_exists_inet6_address_from_device(self):
+        address = 'fe80::a00:27ff:feea:67cf/64'
+        dev = Device('1', 'eth0')
+        dev.inet = []
+        dev.inet6 = [address]
+        self.assertTrue(dev.contains_address(address))
+
+    def test_exists_non_existing_inet6_address_from_device(self):
+        dev = Device('1', 'eth0')
+        dev.inet = []
+        dev.inet6 = []
+        self.assertFalse(dev.contains_address('fe80::a00:27ff:feea:67cf/64'))
 
 if __name__ == '__main__':
     unittest.main()

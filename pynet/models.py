@@ -56,14 +56,17 @@ class Device():
         return self.name == 'lo'
 
     def add_address(self, address):
-        if address in self.inet + self.inet6:
+        if self.contains_address(address):
             raise ObjectAlreadyExistsException(address)
         execute_command('ip addr add %s dev %s' % (address, self.name), namespace=self.namespace)
 
     def remove_address(self, address):
-        if address not in self.inet + self.inet6:
+        if not self.contains_address(address):
             raise ObjectNotFoundException(address)
         execute_command('ip addr del %s dev %s' % (address, self.name), namespace=self.namespace)
+
+    def contains_address(self, address):
+        return address in self.inet + self.inet6
 
     @staticmethod
     def discover(namespace=None):

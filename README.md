@@ -15,7 +15,10 @@ It supports:
 Pynet is not yet available on Pypi so it has to be installed from git repo: `pip install git+https://github.com/migibert/pynet.git`
 
 ## Development
-You can run tests with ```py.test --pep8 pynet```
+You can run tests from project's root with the following commands:
+- unit tests : ```py.test --pep8 pynet```
+- functional tests : ```behave pynet/tests/specifications``̀̀
+
 Feel free to submit pull request!
 
 ##Roadmap
