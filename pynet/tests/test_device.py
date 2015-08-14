@@ -25,10 +25,51 @@ class TestDevice(unittest.TestCase):
     def test_init_loopback(self):
         id = '1'
         name = 'lo'
-        dev = Device(id, name)
+        flags = ['LOOPBACK']
+        dev = Device(id, name, flags=flags)
         self.assertEqual(dev.id, id)
         self.assertEqual(dev.name, name)
         self.assertTrue(dev.is_loopback())
+
+    def test_broadcast_when_flag_is_present(self):
+        dev = Device('1', 'eth0', flags=['BROADCAST'])
+        self.assertTrue(dev.is_broadcast())
+
+    def test_broadcast_when_flag_is_not_present(self):
+        dev = Device('1', 'eth0', flags=[])
+        self.assertFalse(dev.is_broadcast())
+
+    def test_multicast_when_flag_is_present(self):
+        dev = Device('1', 'eth0', flags=['MULTICAST'])
+        self.assertTrue(dev.is_multicast())
+
+    def test_multicast_when_flag_is_not_present(self):
+        dev = Device('1', 'eth0', flags=[])
+        self.assertFalse(dev.is_multicast())
+
+    def test_up_when_flag_is_present(self):
+        dev = Device('1', 'eth0', flags=['UP'])
+        self.assertTrue(dev.is_up())
+
+    def test_up_when_flag_is_not_present(self):
+        dev = Device('1', 'eth0', flags=[])
+        self.assertFalse(dev.is_up())
+
+    def test_down_when_flag_is_present(self):
+        dev = Device('1', 'eth0', flags=['DOWN'])
+        self.assertTrue(dev.is_down())
+
+    def test_up_when_flag_is_not_present(self):
+        dev = Device('1', 'eth0', flags=[])
+        self.assertTrue(dev.is_down())
+
+    def test_up_when_up_flag_is_present(self):
+        dev = Device('1', 'eth0', flags=['UP'])
+        self.assertFalse(dev.is_down())
+
+    def test_up_when_lower_up_flag_is_present(self):
+        dev = Device('1', 'eth0', flags=['LOWER_UP'])
+        self.assertFalse(dev.is_down())
 
     def test_equality(self):
         dev1 = Device('id', 'name')
@@ -39,12 +80,15 @@ class TestDevice(unittest.TestCase):
     def test_device_discovery(self, execute_command):
         execute_command.return_value = self.ip_addr_list_output
         lo = Device('1', 'lo')
+        lo.flags = ['LOOPBACK', 'UP', 'LOWER_UP']
         lo.inet = ['127.0.0.1/8']
         lo.inet6 = ['::1/128']
         eth0 = Device('2', 'eth0')
+        eth0.flags = ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP']
         eth0.inet = ['10.0.2.15/24', '10.0.2.16/24']
         eth0.inet6 = ['fe80::a00:27ff:feea:67cf/64']
         docker0 = Device('3', 'docker0')
+        docker0.flags = ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP']
         docker0.inet = ['172.17.42.1/16']
         docker0.inet6 = []
 
@@ -54,6 +98,20 @@ class TestDevice(unittest.TestCase):
         self.assertTrue(lo in devices)
         self.assertTrue(eth0 in devices)
         self.assertTrue(docker0 in devices)
+
+        for device in devices:
+            if device is lo:
+                self.assertEqual(device.flags, lo.flags)
+                self.assertEqual(device.inet, lo.inet)
+                self.assertEqual(device.inet6, lo.inet6)
+            if device is eth0:
+                self.assertEqual(device.flags, eth0.flags)
+                self.assertEqual(device.inet, eth0.inet)
+                self.assertEqual(device.inet6, eth0.inet6)
+            if device is docker0:
+                self.assertEqual(device.flags, docker0.flags)
+                self.assertEqual(device.inet, docker0.inet)
+                self.assertEqual(device.inet6, docker0.inet6)
 
     @mock.patch('pynet.models.execute_command')
     def test_device_namespace_discovery(self, execute_command):
@@ -85,7 +143,7 @@ class TestDevice(unittest.TestCase):
         execute_command.assert_called_once_with('ip addr add 192.168.10.10 dev eth0', namespace=None)
 
     @mock.patch('pynet.models.execute_command')
-    def test_existing_address_to_device(self, execute_command):
+    def test_add_existing_address_to_device(self, execute_command):
         dev = Device('1', 'eth0')
         dev.inet = ['192.168.10.10/32']
         with self.assertRaises(ObjectAlreadyExistsException):
@@ -146,6 +204,34 @@ class TestDevice(unittest.TestCase):
         dev.inet = []
         dev.inet6 = []
         self.assertFalse(dev.contains_address('fe80::a00:27ff:feea:67cf/64'))
+
+    @mock.patch('pynet.models.execute_command')
+    def test_enable_up_device(self, execute_command):
+        dev = Device('1', 'eth0')
+        dev.flags = ['UP']
+        dev.enable()
+        execute_command.assert_not_called()
+
+    @mock.patch('pynet.models.execute_command')
+    def test_enable_down_device(self, execute_command):
+        dev = Device('1', 'eth0')
+        dev.flags = []
+        dev.enable()
+        execute_command.assert_called_once_with("ip link set eth0 up", namespace=None)
+
+    @mock.patch('pynet.models.execute_command')
+    def test_disable_up_device(self, execute_command):
+        dev = Device('1', 'eth0')
+        dev.flags = ['UP']
+        dev.disable()
+        execute_command.assert_called_once_with("ip link set eth0 down", namespace=None)
+
+    @mock.patch('pynet.models.execute_command')
+    def test_enable_down_device(self, execute_command):
+        dev = Device('1', 'eth0')
+        dev.flags = []
+        dev.disable()
+        execute_command.assert_not_called()
 
 if __name__ == '__main__':
     unittest.main()

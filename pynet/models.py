@@ -45,15 +45,29 @@ class Namespace():
 
 
 class Device():
-    def __init__(self, id, name, namespace=None):
+    def __init__(self, id, name, flags=[], namespace=None):
         self.id = id
         self.name = name
+        self.flags = flags
         self.namespace = namespace
+        self.state = None
         self.inet = []
         self.inet6 = []
 
     def is_loopback(self):
-        return self.name == 'lo'
+        return 'LOOPBACK' in self.flags
+
+    def is_multicast(self):
+        return 'MULTICAST' in self.flags
+
+    def is_broadcast(self):
+        return 'BROADCAST' in self.flags
+
+    def is_up(self):
+        return 'UP' in self.flags
+
+    def is_down(self):
+        return 'LOWER_UP' not in self.flags and not self.is_up()
 
     def add_address(self, address):
         if self.contains_address(address):
@@ -68,6 +82,14 @@ class Device():
     def contains_address(self, address):
         return address in self.inet + self.inet6
 
+    def enable(self):
+        if self.is_down():
+            execute_command('ip link set %s up' % self.name, namespace=self.namespace)
+
+    def disable(self):
+        if not self.is_down():
+            execute_command('ip link set %s down' % self.name, namespace=self.namespace)
+
     @staticmethod
     def discover(namespace=None):
         output = execute_command('ip addr list', namespace)
@@ -80,9 +102,13 @@ class Device():
                 prefixes = block.split(':')
                 id = prefixes[0]
                 name = prefixes[1].strip()
-                current_device = Device(id, name, namespace=namespace)
+                flags = block[block.index('<')+1:block.index('>')].split(',')
+                current_device = Device(id, name, flags=flags, namespace=namespace)
             else:
                 words = block.strip().split(' ')
+                state = find_value(words, 'state')
+                if state is not None:
+                    current_device.state = state
                 inet = find_value(words, 'inet')
                 if inet is not None:
                     current_device.inet.append(inet)
@@ -94,11 +120,7 @@ class Device():
         return devices
 
     def __eq__(self, other):
-        return \
-            self.name == other.name and \
-            self.id == other.id and \
-            self.inet == other.inet and \
-            self.inet6 == other.inet6
+        return self.name == other.name and self.id == other.id
 
     def __repr__(self):
         return '[' + ','.join([self.id, self.name, str(self.inet), str(self.inet6)]) + ']'

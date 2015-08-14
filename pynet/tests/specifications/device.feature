@@ -33,3 +33,18 @@ Feature: Manage devices configurations
      When I discover devices
      Then "lo" is found in discovered devices
      And "eth0" is found in discovered devices
+     And no exception is raised
+
+  Scenario: Manage device deactivation
+     Given device "eth0" exists
+     And device "eth0" is up
+     When I disable device "eth0"
+     Then device "eth0" is down
+     And no exception is raised
+
+    Scenario: Manage device activation
+     Given device "eth0" exists
+     And device "eth0" is down
+     When I enable device "eth0"
+     Then device "eth0" is up
+     And no exception is raised

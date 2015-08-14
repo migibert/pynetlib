@@ -1,7 +1,7 @@
 # pynet
 [![Build Status](https://travis-ci.org/migibert/pynet.svg?branch=master)](https://travis-ci.org/migibert/pynet)
 
-This library is a wrapper around 'ip' command. 
+This library is a wrapper around 'ip' command.
 
 It supports:
 - namespace discovery via `ip netns list`
@@ -10,6 +10,10 @@ It supports:
 - device discovery via `ip addr list`
 - address addition via `ip addr add <address> dev <device>`
 - address deletion via `ip addr del <address> dev <device>
+- device ability via `ip link set <DEVICE> up`
+- device disability via `ip link set <DEVICE> down`
+
+Make sure to run the scripts using this library with a user that can perform these operations.
 
 ## Installation
 Pynet is not yet available on Pypi so it has to be installed from git repo: `pip install git+https://github.com/migibert/pynet.git`
@@ -22,8 +26,6 @@ You can run tests from project's root with the following commands:
 Feel free to submit pull request!
 
 ##Roadmap
-- Enable network interface via `ip link set <DEVICE> up`
-- Disable network interface via `ip link set <DEVICE> down`
 - List routes via `ip route show`
 - Add static route via `ip route add <DESTINATION> via <GATEWAY> dev <DEVICE>`
 - Remove static route via `ip route del <DESTINATION>`
