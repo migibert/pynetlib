@@ -6,6 +6,5 @@ install:
 
 script:
   - py.test --pep8 pynet
-  - behave pynet/tests/specifications
 
 sudo: false
