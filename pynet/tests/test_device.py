@@ -4,13 +4,14 @@ import unittest
 from pynet.models import Namespace, Device
 from pynet.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 
-IP_ADDR_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_list')
-
+IP_ADDR_LIST_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_list')
+IP_ADDR_SHOW_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_show')
 
 class TestDevice(unittest.TestCase):
 
     def setUp(self):
-        self.ip_addr_list_output = open(IP_ADDR_RESULT).read()
+        self.ip_addr_list_output = open(IP_ADDR_LIST_RESULT).read()
+        self.ip_addr_show_output = open(IP_ADDR_SHOW_RESULT).read()
 
     def test_init_device(self):
         id = '1'
@@ -139,45 +140,57 @@ class TestDevice(unittest.TestCase):
     @mock.patch('pynet.models.execute_command')
     def test_add_address_to_device_on_default_namespace(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.add_address('192.168.10.10')
         execute_command.assert_called_once_with('ip addr add 192.168.10.10 dev eth0', namespace=None)
+        dev.refresh.assert_called_once_with()
 
     @mock.patch('pynet.models.execute_command')
     def test_add_existing_address_to_device(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.inet = ['192.168.10.10/32']
         with self.assertRaises(ObjectAlreadyExistsException):
             dev.add_address('192.168.10.10/32')
         execute_command.assert_not_called()
+        dev.refresh.assert_not_called
 
     @mock.patch('pynet.models.execute_command')
     def test_add_address_to_device_on_specific_namespace(self, execute_command):
         ns = Namespace('ns')
         dev = Device('1', 'eth0', namespace=ns)
+        dev.refresh = mock.Mock()
         dev.add_address('192.168.10.10')
         execute_command.assert_called_once_with('ip addr add 192.168.10.10 dev eth0', namespace=ns)
+        dev.refresh.assert_called_once_with()
 
     @mock.patch('pynet.models.execute_command')
     def test_remove_address_from_device_on_default_namespace(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.inet = ['192.168.10.10/32']
         dev.remove_address('192.168.10.10/32')
         execute_command.assert_called_once_with('ip addr del 192.168.10.10/32 dev eth0', namespace=None)
+        dev.refresh.assert_called_once_with()
 
     @mock.patch('pynet.models.execute_command')
     def test_remove_address_from_device_on_specific_namespace(self, execute_command):
         ns = Namespace('ns')
         dev = Device('1', 'eth0', namespace=ns)
+        dev.refresh = mock.Mock()
         dev.inet = ['192.168.10.10/32']
         dev.remove_address('192.168.10.10/32')
         execute_command.assert_called_once_with('ip addr del 192.168.10.10/32 dev eth0', namespace=ns)
+        dev.refresh.assert_called_once_with()
 
     @mock.patch('pynet.models.execute_command')
     def test_remove_non_existing_address_from_device(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         with self.assertRaises(ObjectNotFoundException):
             dev.remove_address('192.168.10.10/32')
         execute_command.assert_not_called()
+        dev.refresh.assert_not_called()
 
     def test_exists_address_from_device(self):
         address = '192.168.42.42'
@@ -208,30 +221,53 @@ class TestDevice(unittest.TestCase):
     @mock.patch('pynet.models.execute_command')
     def test_enable_up_device(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.flags = ['UP']
         dev.enable()
         execute_command.assert_not_called()
+        dev.refresh.assert_not_called()
 
     @mock.patch('pynet.models.execute_command')
     def test_enable_down_device(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.flags = []
         dev.enable()
         execute_command.assert_called_once_with("ip link set eth0 up", namespace=None)
+        dev.refresh.assert_called_once_with()
 
     @mock.patch('pynet.models.execute_command')
     def test_disable_up_device(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.flags = ['UP']
         dev.disable()
         execute_command.assert_called_once_with("ip link set eth0 down", namespace=None)
+        dev.refresh.assert_called_once_with()
 
     @mock.patch('pynet.models.execute_command')
     def test_enable_down_device(self, execute_command):
         dev = Device('1', 'eth0')
+        dev.refresh = mock.Mock()
         dev.flags = []
         dev.disable()
         execute_command.assert_not_called()
+        dev.refresh.assert_not_called()
+
+    @mock.patch('pynet.models.execute_command')
+    def test_refresh_device(self, execute_command):
+        execute_command.return_value = self.ip_addr_show_output
+        device = Device('1', 'eth0')
+        device.flags = []
+        device.refresh()
+        execute_command.assert_called_once_with("ip addr show eth0", namespace=None)
+        self.assertEqual(device.id, '2')
+        self.assertEqual(device.name, "eth0")
+        self.assertEqual(device.flags, ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'])
+        self.assertEqual(device.inet, ['10.0.2.15/24'])
+        self.assertEqual(device.inet6, ['fe80::a00:27ff:feea:67cf/64'])
+        self.assertIsNone(device.namespace)
+
 
 if __name__ == '__main__':
     unittest.main()

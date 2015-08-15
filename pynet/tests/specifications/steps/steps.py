@@ -21,31 +21,36 @@ def step_impl(context, device_name):
     for dev in Device.discover():
         if dev.name == device_name:
             device = dev
-    assert device is not None
+    assert device is not None #TODO: create the device if necessary
+    context.device = device
 
 @given(u'address "{address}" does not exist on device "{device_name}"')
 def step_impl(context, address, device_name):
     for dev in Device.discover():
         if dev.name == device_name and dev.contains_address(address):
             dev.remove_address(address)
+            context.device = dev
 
 @given(u'address "{address}" exists on device "{device_name}"')
 def step_impl(context, address, device_name):
     for dev in Device.discover():
         if dev.name == device_name and not dev.contains_address(address):
             dev.add_address(address)
+            context.device = dev
 
 @given(u'device "{device_name}" is up')
 def step_impl(context, device_name):
     for dev in Device.discover():
         if dev.name == device_name and not dev.is_up():
             dev.enable()
+            context.device = dev
 
 @given(u'device "{device_name}" is down')
 def step_impl(context, device_name):
     for dev in Device.discover():
         if dev.name == device_name and not dev.is_down():
             dev.disable()
+            context.device = dev
 
 @when(u'I create a namespace "{namespace_name}"')
 def step_impl(context, namespace_name):
@@ -85,21 +90,21 @@ def step_impl(context):
 
 @when(u'I add address "{address}" to device "{device_name}"')
 def step_impl(context, address, device_name):
-    for dev in Device.discover():
-        if dev.name == device_name:
-            try:
-                dev.add_address(address)
-            except Exception as e:
-                context.exception = e
+    device = context.device
+    assert device.name == device_name
+    try:
+        device.add_address(address)
+    except Exception as e:
+        context.exception = e
 
 @when(u'I remove address "{address}" from device "{device_name}"')
 def step_impl(context, address, device_name):
-    for dev in Device.discover():
-        if dev.name == device_name:
-            try:
-                dev.remove_address(address)
-            except Exception as e:
-                context.exception = e
+    device = context.device
+    assert device.name == device_name
+    try:
+        device.remove_address(address)
+    except Exception as e:
+        context.exception = e
 
 @when(u'I discover devices')
 def step_impl(context):
@@ -107,21 +112,21 @@ def step_impl(context):
 
 @when(u'I disable device "{device_name}"')
 def step_impl(context, device_name):
-    for dev in Device.discover():
-        if dev.name == device_name:
-            try:
-                dev.disable()
-            except Exception as e:
-                context.exception = e
+    device = context.device
+    assert device.name == device_name
+    try:
+        device.disable()
+    except Exception as e:
+        context.exception = e
 
 @when(u'I enable device "{device_name}"')
 def step_impl(context, device_name):
-    for dev in Device.discover():
-        if dev.name == device_name:
-            try:
-                dev.enable()
-            except Exception as e:
-                context.exception = e
+    device = context.device
+    assert device.name == device_name
+    try:
+        device.enable()
+    except Exception as e:
+        context.exception = e
 
 @then(u'namespace "{namespace_name}" exists')
 def step_impl(context, namespace_name):
@@ -143,23 +148,15 @@ def step_impl(context):
 
 @then(u'address "{address}" is affected to device "{device_name}"')
 def step_impl(context, address, device_name):
-    dev = None
-    devices = Device.discover()
-    for device in devices:
-        if device.name == device_name:
-            dev = device
-            assert device.contains_address(address)
-    assert dev is not None
+    device = context.device
+    assert device.name == device_name
+    assert device.contains_address(address)
 
 @then(u'address {address}" is not affected to device "{device_name}"')
 def step_impl(context, address, device_name):
-    dev = None
-    devices = Device.discover()
-    for device in devices:
-        if device.name == device_name:
-            dev = device
-            assert not device.contains_address(address)
-    assert dev is not None
+    device = context.device
+    assert device.name == device_name
+    assert not device.contains_address(address)
 
 @then(u'"{device_name}" is found in discovered devices')
 def step_impl(context, device_name):
@@ -172,23 +169,15 @@ def step_impl(context, device_name):
 
 @then(u'device "{device_name}" is down')
 def step_impl(context, device_name):
-    dev = None
-    devices = Device.discover()
-    for device in devices:
-        if device.name == device_name:
-            dev = device
-            assert device.is_down()
-    assert dev is not None
+    device = context.device
+    assert device.name == device_name
+    assert device.is_down()
 
 @then(u'device "{device_name}" is up')
 def step_impl(context, device_name):
-    dev = None
-    devices = Device.discover()
-    for device in devices:
-        if device.name == device_name:
-            dev = device
-            assert device.is_up()
-    assert dev is not None
+    device = context.device
+    assert device.name == device_name
+    assert device.is_up()
 
 @then(u'no exception is raised')
 def step_impl(context):

@@ -73,11 +73,13 @@ class Device():
         if self.contains_address(address):
             raise ObjectAlreadyExistsException(address)
         execute_command('ip addr add %s dev %s' % (address, self.name), namespace=self.namespace)
+        self.refresh()
 
     def remove_address(self, address):
         if not self.contains_address(address):
             raise ObjectNotFoundException(address)
         execute_command('ip addr del %s dev %s' % (address, self.name), namespace=self.namespace)
+        self.refresh()
 
     def contains_address(self, address):
         return address in self.inet + self.inet6
@@ -85,14 +87,34 @@ class Device():
     def enable(self):
         if self.is_down():
             execute_command('ip link set %s up' % self.name, namespace=self.namespace)
+            self.refresh()
 
     def disable(self):
         if not self.is_down():
             execute_command('ip link set %s down' % self.name, namespace=self.namespace)
+            self.refresh()
+
+    def refresh(self):
+        output = execute_command('ip addr show %s' % self.name, namespace=self.namespace)
+        devices = Device.parse_output(output, namespace=self.namespace)
+        if len(devices) != 1:
+            raise Exception('Only one device can be named %s inside the same namespace' % self.name)
+        dev = devices[0]
+        self.id = dev.id
+        self.name = dev.name
+        self.flags = dev.flags
+        self.namespace = dev.namespace
+        self.state = dev.state
+        self.inet = dev.inet
+        self.inet6 = dev.inet6
 
     @staticmethod
     def discover(namespace=None):
-        output = execute_command('ip addr list', namespace)
+        output = execute_command('ip addr list', namespace=namespace)
+        return Device.parse_output(output, namespace=namespace)
+
+    @staticmethod
+    def parse_output(output, namespace=None):
         devices = []
         current_device = None
         for block in output.split('\n'):
