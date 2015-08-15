@@ -7,6 +7,7 @@ from pynet.exceptions import ObjectNotFoundException, ObjectAlreadyExistsExcepti
 IP_ADDR_LIST_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_list')
 IP_ADDR_SHOW_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_show')
 
+
 class TestDevice(unittest.TestCase):
 
     def setUp(self):

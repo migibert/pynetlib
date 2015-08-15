@@ -124,7 +124,7 @@ class Device():
                 prefixes = block.split(':')
                 id = prefixes[0]
                 name = prefixes[1].strip()
-                flags = block[block.index('<')+1:block.index('>')].split(',')
+                flags = block[block.index('<') + 1:block.index('>')].split(',')
                 current_device = Device(id, name, flags=flags, namespace=namespace)
             else:
                 words = block.strip().split(' ')
