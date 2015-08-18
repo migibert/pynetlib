@@ -3,8 +3,10 @@ python: 2.7
 
 install:
   - pip install -r requirements.txt
-
+  - pip install coveralls
 script:
-  - py.test --pep8 pynet
+  - py.test pynet --pep8 --cov=pynet --cov-report term-missing
+after_success:
+  - coveralls
 
 sudo: false
