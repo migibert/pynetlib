@@ -1,5 +1,6 @@
 # pynet
 [![Build Status](https://travis-ci.org/migibert/pynet.svg?branch=master)](https://travis-ci.org/migibert/pynet)
+[![Coverage Status](https://coveralls.io/repos/migibert/pynet/badge.svg?branch=master)](https://coveralls.io/github/migibert/pynet)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 
 This library is a wrapper around 'ip' command.
