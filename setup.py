@@ -8,9 +8,9 @@ install_reqs = parse_requirements('requirements.txt', session=False)
 dependencies = [str(ir.req) for ir in install_reqs]
 
 setup(
-    name='pynet',
+    name='pynetlib',
     version='0.1.0',
-    url='https://github.com/migibert/pynet',
+    url='https://github.com/migibert/pynetlib',
     license='MIT',
     author='Mikael Gibert',
     author_email='mikael.gibert@gmail.com',

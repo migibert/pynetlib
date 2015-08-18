@@ -1,5 +1,5 @@
 import subprocess
-from pynet.exceptions import ValueNotFoundException
+from pynetlib.exceptions import ValueNotFoundException
 
 
 def execute_command(command, namespace=None):

@@ -2,8 +2,8 @@ from mock.mock import call
 import os
 import mock
 import unittest
-from pynet.exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
-from pynet.models import Namespace, Device
+from pynetlib.exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
+from pynetlib.models import Namespace, Device
 
 IP_ADDR_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_list')
 IP_NETNS_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_netns_list')
@@ -35,7 +35,7 @@ class TestNamespace(unittest.TestCase):
         ns2 = Namespace(name)
         self.assertEqual(ns1, ns2)
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_namespace_discovery(self, execute_command):
 
         execute_command.return_value = self.ip_netns_list_output
@@ -50,7 +50,7 @@ class TestNamespace(unittest.TestCase):
         self.assertTrue(first_namespace in namespaces)
         self.assertTrue(second_namespace in namespaces)
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_device_discovery(self, execute_command):
 
         execute_command.side_effect = [
@@ -78,7 +78,7 @@ class TestNamespace(unittest.TestCase):
             self.assertTrue(eth0 in namespace.devices)
             self.assertTrue(docker0 in namespace.devices)
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_namespace_creation(self, execute_command):
         namespace = Namespace('namespace')
         namespace.create()
@@ -86,14 +86,14 @@ class TestNamespace(unittest.TestCase):
         self.assertTrue(call('ip netns list') in execute_command.mock_calls)
         self.assertTrue(call('ip netns add namespace') in execute_command.mock_calls)
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_default_namespace_creation(self, execute_command):
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         with self.assertRaises(ObjectAlreadyExistsException):
             namespace.create()
         execute_command.assert_not_called()
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_existing_namespace_creation(self, execute_command):
         execute_command.side_effect = ['namespace']
         namespace = Namespace('namespace')
@@ -101,7 +101,7 @@ class TestNamespace(unittest.TestCase):
             namespace.create()
         execute_command.assert_called_once_with('ip netns list')
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_namespace_deletion(self, execute_command):
         execute_command.side_effect = ['namespace', None]
         namespace = Namespace('namespace')
@@ -110,7 +110,7 @@ class TestNamespace(unittest.TestCase):
         self.assertTrue(call('ip netns list') in execute_command.mock_calls)
         self.assertTrue(call('ip netns del namespace') in execute_command.mock_calls)
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_default_namespace_deletion(self, execute_command):
         execute_command.side_effect = ['']
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
@@ -118,14 +118,14 @@ class TestNamespace(unittest.TestCase):
             namespace.delete()
         execute_command.assert_not_called()
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_non_existing_namespace_deletion(self, execute_command):
         namespace = Namespace('namespace')
         with self.assertRaises(ObjectNotFoundException):
             namespace.delete()
         execute_command.assert_called_once_with('ip netns list')
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_namespace_existence(self, execute_command):
         execute_command.side_effect = ['namespace']
         namespace = Namespace('namespace')
@@ -133,14 +133,14 @@ class TestNamespace(unittest.TestCase):
         self.assertTrue(result)
         execute_command.assert_called_once_with('ip netns list')
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_default_namespace_existence(self, execute_command):
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         result = namespace.exists()
         self.assertTrue(result)
         execute_command.assert_called_once_with('ip netns list')
 
-    @mock.patch('pynet.models.execute_command')
+    @mock.patch('pynetlib.models.execute_command')
     def test_non_existing_namespace_existence(self, execute_command):
         namespace = Namespace('namespace')
         result = namespace.exists()

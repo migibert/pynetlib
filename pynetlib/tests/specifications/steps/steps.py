@@ -1,6 +1,6 @@
 from behave import given, when, then
-from pynet.models import Namespace, Device
-from pynet.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ForbiddenException
+from pynetlib.models import Namespace, Device
+from pynetlib.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ForbiddenException
 
 
 @given(u'namespace "{namespace_name}" does not exist')

@@ -1,2 +1,2 @@
 [run]
-omit = pynet/tests/*
+omit = pynetlib/tests/*
