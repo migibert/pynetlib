@@ -1,6 +1,6 @@
-# pynet
-[![Build Status](https://travis-ci.org/migibert/pynet.svg?branch=master)](https://travis-ci.org/migibert/pynet)
-[![Coverage Status](https://coveralls.io/repos/migibert/pynet/badge.svg?branch=master)](https://coveralls.io/github/migibert/pynet)
+# pynetlib
+[![Build Status](https://travis-ci.org/migibert/pynetlib.svg?branch=master)](https://travis-ci.org/migibert/pynetlib)
+[![Coverage Status](https://coveralls.io/repos/migibert/pynetlib/badge.svg?branch=master)](https://coveralls.io/github/migibert/pynetlib)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 
 This library is a wrapper around 'ip' command.
@@ -18,12 +18,12 @@ It supports:
 Make sure to run the scripts using this library with a user that can perform these operations.
 
 ## Installation
-Pynet is not yet available on Pypi so it has to be installed from git repo: `pip install git+https://github.com/migibert/pynet.git`
+pynetlib is not yet available on Pypi so it has to be installed from git repo: `pip install git+https://github.com/migibert/pynetlib.git`
 
 ## Development
 You can run tests from project's root with the following commands:
-- unit tests : ```py.test pynet --pep8 --cov=pynet --cov-report term-missing```
-- functional tests : ```behave pynet/tests/specifications```
+- unit tests : ```py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing```
+- functional tests : ```behave pynetlib/tests/specifications```
 
 Feel free to submit pull request!
 

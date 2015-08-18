@@ -1,30 +1,30 @@
 import mock
 import unittest
-from pynet.utils import execute_command, find_value
-from pynet.models import Namespace
-from pynet.exceptions import ValueNotFoundException
+from pynetlib.utils import execute_command, find_value
+from pynetlib.models import Namespace
+from pynetlib.exceptions import ValueNotFoundException
 
 
 class TestNamespace(unittest.TestCase):
 
-    @mock.patch('pynet.utils.subprocess.check_output')
+    @mock.patch('pynetlib.utils.subprocess.check_output')
     def test_execute_command(self, check_output):
         execute_command('command arg1 arg2')
         check_output.assert_called_once_with('command arg1 arg2', shell=True)
 
-    @mock.patch('pynet.utils.subprocess.check_output')
+    @mock.patch('pynetlib.utils.subprocess.check_output')
     def test_execute_command_in_namespace(self, check_output):
         namespace = Namespace('namespace')
         execute_command('command arg1 arg2', namespace=namespace)
         check_output.assert_called_once_with('ip netns exec namespace command arg1 arg2', shell=True)
 
-    @mock.patch('pynet.utils.subprocess.check_output')
+    @mock.patch('pynetlib.utils.subprocess.check_output')
     def test_execute_command_in_default_namespace(self, check_output):
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         execute_command('command arg1 arg2', namespace=namespace)
         check_output.assert_called_once_with('command arg1 arg2', shell=True)
 
-    @mock.patch('pynet.utils.subprocess.check_output')
+    @mock.patch('pynetlib.utils.subprocess.check_output')
     def test_execute_command_in_string_namespace(self, check_output):
         namespace = 'namespace'
         execute_command('command arg1 arg2', namespace=namespace)
