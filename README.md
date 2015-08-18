@@ -26,6 +26,8 @@ You can run tests from project's root with the following commands:
 - unit tests : ```py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing```
 - functional tests : ```behave pynetlib/tests/specifications```
 
+Dependencies can be intalled using test-requirements.txt file : ```pip install -r test-requirements.txt```
+
 Feel free to submit pull request!
 
 ##Roadmap
