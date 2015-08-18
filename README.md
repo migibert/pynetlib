@@ -1,6 +1,6 @@
 # pynetlib
 [![Build Status](https://travis-ci.org/migibert/pynetlib.svg?branch=master)](https://travis-ci.org/migibert/pynetlib)
-[![Coverage Status](https://coveralls.io/repos/migibert/pynetlib/badge.svg?branch=master)](https://coveralls.io/github/migibert/pynetlib)
+[![Coverage Status](https://coveralls.io/repos/migibert/pynetlib/badge.svg?branch=master&service=github)](https://coveralls.io/github/migibert/pynetlib?branch=master)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 
 This library is a wrapper around 'ip' command.
@@ -19,6 +19,7 @@ Make sure to run the scripts using this library with a user that can perform the
 
 ## Installation
 pynetlib is not yet available on Pypi so it has to be installed from git repo: `pip install git+https://github.com/migibert/pynetlib.git`
+Pypi package is coming soon!
 
 ## Development
 You can run tests from project's root with the following commands:
