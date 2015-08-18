@@ -22,7 +22,7 @@ Pynet is not yet available on Pypi so it has to be installed from git repo: `pip
 
 ## Development
 You can run tests from project's root with the following commands:
-- unit tests : ```py.test --pep8 pynet```
+- unit tests : ```py.test pynet --pep8 --cov=pynet --cov-report term-missing```
 - functional tests : ```behave pynet/tests/specifications```
 
 Feel free to submit pull request!
@@ -32,3 +32,8 @@ Feel free to submit pull request!
 - Add static route via `ip route add <DESTINATION> via <GATEWAY> dev <DEVICE>`
 - Remove static route via `ip route del <DESTINATION>`
 - Add default gateway via `ip route add default via <GATEWAY>`
+- Get broadcast addresses from `ip addr list`
+- Get maximum transmission unit from `ip addr list`
+- Get the length of the transmit queue from `ip addr list` (qlen field)
+- Set the maximum transmission unit to device via `ip link set mtu <VALUE> dev <DEVICE>`
+- Set the length of the transmit queue via `ip link set txqueuelen <LENGTH> dev <DEVICE>`
