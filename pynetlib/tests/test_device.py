@@ -1,6 +1,8 @@
+from nose_parameterized.parameterized import parameterized
 import os
 import mock
 import unittest
+from nose_parameterized import parameterized
 from pynetlib.models import Namespace, Device
 from pynetlib.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 
@@ -33,110 +35,78 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev.name, name)
         self.assertTrue(dev.is_loopback())
 
-    def test_broadcast_when_flag_is_present(self):
-        dev = Device('1', 'eth0', flags=['BROADCAST'])
-        self.assertTrue(dev.is_broadcast())
+    @parameterized.expand([(['BROADCAST'], True), ([], False)])
+    def test_broadcast(self, flags, is_broadcast):
+        dev = Device('1', 'eth0', flags=flags)
+        self.assertEqual(dev.is_broadcast(), is_broadcast)
 
-    def test_broadcast_when_flag_is_not_present(self):
-        dev = Device('1', 'eth0', flags=[])
-        self.assertFalse(dev.is_broadcast())
+    @parameterized.expand([(['MULTICAST'], True), ([], False)])
+    def test_multicast(self, flags, is_multicast):
+        dev = Device('1', 'eth0', flags=flags)
+        self.assertEqual(dev.is_multicast(), is_multicast)
 
-    def test_multicast_when_flag_is_present(self):
-        dev = Device('1', 'eth0', flags=['MULTICAST'])
-        self.assertTrue(dev.is_multicast())
-
-    def test_multicast_when_flag_is_not_present(self):
-        dev = Device('1', 'eth0', flags=[])
-        self.assertFalse(dev.is_multicast())
-
-    def test_up_when_flag_is_present(self):
-        dev = Device('1', 'eth0', flags=['UP'])
-        self.assertTrue(dev.is_up())
-
-    def test_up_when_flag_is_not_present(self):
-        dev = Device('1', 'eth0', flags=[])
-        self.assertFalse(dev.is_up())
-
-    def test_down_when_flag_is_present(self):
-        dev = Device('1', 'eth0', flags=['DOWN'])
-        self.assertTrue(dev.is_down())
-
-    def test_up_when_flag_is_not_present(self):
-        dev = Device('1', 'eth0', flags=[])
-        self.assertTrue(dev.is_down())
-
-    def test_up_when_up_flag_is_present(self):
-        dev = Device('1', 'eth0', flags=['UP'])
-        self.assertFalse(dev.is_down())
-
-    def test_up_when_lower_up_flag_is_present(self):
-        dev = Device('1', 'eth0', flags=['LOWER_UP'])
-        self.assertFalse(dev.is_down())
+    @parameterized.expand([
+        (['UP'], (True, False, False, False)),
+        (['LOWER_UP'], (False, False, False, False)),
+        (['DOWN'], (False, True, False, False)),
+        ([], (False, True, False, False)),
+        (['BROADCAST'], (False, True, True, False)),
+        (['MULTICAST'], (False, True, False, True)),
+        (['UP', 'BROADCAST', 'MULTICAST'], (True, False, True, True))
+    ])
+    def test_flags(self, flags, statuses):
+        is_up, is_down, is_broadcast, is_multicast = statuses
+        dev = Device('1', 'eth0', flags=flags)
+        self.assertEqual(dev.is_up(), is_up)
+        self.assertEqual(dev.is_down(), is_down)
+        self.assertEqual(dev.is_broadcast(), is_broadcast)
+        self.assertEqual(dev.is_multicast(), is_multicast)
 
     def test_equality(self):
         dev1 = Device('id', 'name')
         dev2 = Device('id', 'name')
         self.assertEqual(dev1, dev2)
 
-    @mock.patch('pynetlib.models.execute_command')
-    def test_device_discovery(self, execute_command):
-        execute_command.return_value = self.ip_addr_list_output
-        lo = Device('1', 'lo')
-        lo.flags = ['LOOPBACK', 'UP', 'LOWER_UP']
-        lo.inet = ['127.0.0.1/8']
-        lo.inet6 = ['::1/128']
-        eth0 = Device('2', 'eth0')
-        eth0.flags = ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP']
-        eth0.inet = ['10.0.2.15/24', '10.0.2.16/24']
-        eth0.inet6 = ['fe80::a00:27ff:feea:67cf/64']
-        docker0 = Device('3', 'docker0')
-        docker0.flags = ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP']
-        docker0.inet = ['172.17.42.1/16']
-        docker0.inet6 = []
+    @parameterized.expand([
+        ('1', 'lo', ['LOOPBACK', 'UP', 'LOWER_UP'], ['127.0.0.1/8'], ['::1/128']),
+        ('2', 'eth0', ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'], ['10.0.2.15/24', '10.0.2.16/24'], ['fe80::a00:27ff:feea:67cf/64']),
+        ('3', 'docker0', ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP'], ['172.17.42.1/16'], [])
+    ])
+    def test_device_discovery(self, id, name, flags, inet, inet6):
+        device = Device(id, name, flags=flags)
+        device.inet = inet
+        device.inet6 = inet6
 
-        devices = Device.discover()
+        with mock.patch('pynetlib.models.execute_command') as execute_command:
+            execute_command.return_value = self.ip_addr_list_output
+            devices = Device.discover()
 
         self.assertEqual(len(devices), 3)
-        self.assertTrue(lo in devices)
-        self.assertTrue(eth0 in devices)
-        self.assertTrue(docker0 in devices)
+        self.assertTrue(device in devices)
+        found_device = devices[devices.index(device)]
+        self.assertEqual(found_device.flags, device.flags)
+        self.assertEqual(found_device.inet, device.inet)
+        self.assertEqual(found_device.inet6, device.inet6)
 
-        for device in devices:
-            if device is lo:
-                self.assertEqual(device.flags, lo.flags)
-                self.assertEqual(device.inet, lo.inet)
-                self.assertEqual(device.inet6, lo.inet6)
-            if device is eth0:
-                self.assertEqual(device.flags, eth0.flags)
-                self.assertEqual(device.inet, eth0.inet)
-                self.assertEqual(device.inet6, eth0.inet6)
-            if device is docker0:
-                self.assertEqual(device.flags, docker0.flags)
-                self.assertEqual(device.inet, docker0.inet)
-                self.assertEqual(device.inet6, docker0.inet6)
-
+    @parameterized.expand([
+        ('1', 'lo', ['127.0.0.1/8'], ['::1/128']),
+        ('2', 'eth0', ['10.0.2.15/24', '10.0.2.16/24'], ['fe80::a00:27ff:feea:67cf/64']),
+        ('3', 'docker0', ['172.17.42.1/16'], [])
+    ])
     @mock.patch('pynetlib.models.execute_command')
-    def test_device_namespace_discovery(self, execute_command):
+    def test_device_namespace_discovery(self, id, name, inet, inet6, execute_command):
         namespace = Namespace('namespace')
         execute_command.return_value = self.ip_addr_list_output
-        lo = Device('1', 'lo')
-        lo.inet = ['127.0.0.1/8']
-        lo.inet6 = ['::1/128']
-        eth0 = Device('2', 'eth0')
-        eth0.inet = ['10.0.2.15/24', '10.0.2.16/24']
-        eth0.inet6 = ['fe80::a00:27ff:feea:67cf/64']
-        docker0 = Device('3', 'docker0')
-        docker0.inet = ['172.17.42.1/16']
-        docker0.inet6 = []
+        device = Device(id, name)
+        device.inet = inet
+        device.inet6 = inet6
+        device.namespace = namespace
 
         devices = Device.discover(namespace=namespace)
 
         self.assertEqual(len(devices), 3)
-        self.assertTrue(lo in devices)
-        self.assertTrue(eth0 in devices)
-        self.assertTrue(docker0 in devices)
-        for device in devices:
-            self.assertEqual(device.namespace, namespace)
+        self.assertTrue(device in devices)
+        self.assertEqual(device.namespace, namespace)
 
     @mock.patch('pynetlib.models.execute_command')
     def test_add_address_to_device_on_default_namespace(self, execute_command):
@@ -193,64 +163,51 @@ class TestDevice(unittest.TestCase):
         execute_command.assert_not_called()
         dev.refresh.assert_not_called()
 
-    def test_exists_address_from_device(self):
-        address = '192.168.42.42'
+    @parameterized.expand([('192.168.42.42', ['192.168.42.42'], True), ('192.168.42.42', [], False)])
+    def test_exists_address_from_device(self, address, addresses, exists):
         dev = Device('1', 'eth0')
-        dev.inet = ['10.0.2.15/24', address]
+        dev.inet = addresses
         dev.inet6 = []
-        self.assertTrue(dev.contains_address(address))
+        self.assertEqual(dev.contains_address(address), exists)
 
-    def test_exists_non_existing_address_from_device(self):
+    @parameterized.expand([
+        ('fe80::a00:27ff:feea:67cf/64', ['fe80::a00:27ff:feea:67cf/64'], True),
+        ('fe80::a00:27ff:feea:67cf/64', [], False),
+    ])
+    def test_exists_inet6_address_from_device(self, address, addresses, exists):
         dev = Device('1', 'eth0')
         dev.inet = []
-        dev.inet6 = []
-        self.assertFalse(dev.contains_address('192.168.42.42'))
-
-    def test_exists_inet6_address_from_device(self):
-        address = 'fe80::a00:27ff:feea:67cf/64'
-        dev = Device('1', 'eth0')
-        dev.inet = []
-        dev.inet6 = [address]
-        self.assertTrue(dev.contains_address(address))
-
-    def test_exists_non_existing_inet6_address_from_device(self):
-        dev = Device('1', 'eth0')
-        dev.inet = []
-        dev.inet6 = []
-        self.assertFalse(dev.contains_address('fe80::a00:27ff:feea:67cf/64'))
+        dev.inet6 = addresses
+        self.assertEqual(dev.contains_address(address), exists)
 
     @mock.patch('pynetlib.models.execute_command')
     def test_enable_up_device(self, execute_command):
-        dev = Device('1', 'eth0')
+        dev = Device('1', 'eth0', flags=['UP'])
         dev.refresh = mock.Mock()
-        dev.flags = ['UP']
         dev.enable()
         execute_command.assert_not_called()
         dev.refresh.assert_not_called()
 
     @mock.patch('pynetlib.models.execute_command')
     def test_enable_down_device(self, execute_command):
-        dev = Device('1', 'eth0')
+        dev = Device('1', 'eth0', flags=[])
         dev.refresh = mock.Mock()
-        dev.flags = []
         dev.enable()
         execute_command.assert_called_once_with("ip link set eth0 up", namespace=None)
         dev.refresh.assert_called_once_with()
 
     @mock.patch('pynetlib.models.execute_command')
     def test_disable_up_device(self, execute_command):
-        dev = Device('1', 'eth0')
+        dev = Device('1', 'eth0', flags=['UP'])
         dev.refresh = mock.Mock()
-        dev.flags = ['UP']
         dev.disable()
         execute_command.assert_called_once_with("ip link set eth0 down", namespace=None)
         dev.refresh.assert_called_once_with()
 
     @mock.patch('pynetlib.models.execute_command')
-    def test_enable_down_device(self, execute_command):
-        dev = Device('1', 'eth0')
+    def test_disable_down_device(self, execute_command):
+        dev = Device('1', 'eth0', flags=[])
         dev.refresh = mock.Mock()
-        dev.flags = []
         dev.disable()
         execute_command.assert_not_called()
         dev.refresh.assert_not_called()
@@ -258,8 +215,7 @@ class TestDevice(unittest.TestCase):
     @mock.patch('pynetlib.models.execute_command')
     def test_refresh_device(self, execute_command):
         execute_command.return_value = self.ip_addr_show_output
-        device = Device('1', 'eth0')
-        device.flags = []
+        device = Device('1', 'eth0', flags=[])
         device.refresh()
         execute_command.assert_called_once_with("ip addr show eth0", namespace=None)
         self.assertEqual(device.id, '2')
