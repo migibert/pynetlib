@@ -2,6 +2,7 @@ from mock.mock import call
 import os
 import mock
 import unittest
+from nose_parameterized import parameterized
 from pynetlib.exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
 from pynetlib.models import Namespace, Device
 
@@ -15,19 +16,12 @@ class TestNamespace(unittest.TestCase):
         self.ip_addr_list_output = open(IP_ADDR_RESULT).read()
         self.ip_netns_list_output = open(IP_NETNS_RESULT).read()
 
-    def test_init(self):
-        name = 'mynamespace'
+    @parameterized.expand([('mynamespace', False), ('', True)])
+    def test_init(self, name, is_default):
         ns = Namespace(name)
         self.assertEqual(ns.name, name)
         self.assertEqual(len(ns.devices), 0)
-        self.assertFalse(ns.is_default())
-
-    def test_init_default(self):
-        name = ''
-        ns = Namespace(name)
-        self.assertEqual(ns.name, name)
-        self.assertEqual(len(ns.devices), 0)
-        self.assertTrue(ns.is_default())
+        self.assertEqual(ns.is_default(), is_default)
 
     def test_equality(self):
         name = 'namespace'
