@@ -126,17 +126,16 @@ class Device():
                 name = prefixes[1].strip()
                 flags = block[block.index('<') + 1:block.index('>')].split(',')
                 current_device = Device(id, name, flags=flags, namespace=namespace)
-            else:
-                words = block.strip().split(' ')
-                state = find_value(words, 'state')
-                if state is not None:
-                    current_device.state = state
-                inet = find_value(words, 'inet')
-                if inet is not None:
-                    current_device.inet.append(inet)
-                inet6 = find_value(words, 'inet6')
-                if inet6 is not None:
-                    current_device.inet6.append(inet6)
+            words = block.strip().split(' ')
+            state = find_value(words, 'state')
+            if state is not None:
+                current_device.state = state
+            inet = find_value(words, 'inet')
+            if inet is not None:
+                current_device.inet.append(inet)
+            inet6 = find_value(words, 'inet6')
+            if inet6 is not None:
+                current_device.inet6.append(inet6)
         if current_device:
             devices.append(current_device)
         return devices

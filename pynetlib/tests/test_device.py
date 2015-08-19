@@ -25,6 +25,7 @@ class TestDevice(unittest.TestCase):
         self.assertFalse(dev.is_loopback())
         self.assertEqual(dev.inet, [])
         self.assertEqual(dev.inet6, [])
+        self.assertIsNone(dev.state)
 
     def test_init_loopback(self):
         id = '1'
@@ -58,18 +59,19 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev1, dev2)
 
     @parameterized.expand([
-        ('1', 'lo', ['LOOPBACK', 'UP', 'LOWER_UP'], ['127.0.0.1/8'], ['::1/128']),
-        ('2', 'eth0', ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'], ['10.0.2.15/24', '10.0.2.16/24'], ['fe80::a00:27ff:feea:67cf/64']),
-        ('3', 'docker0', ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP'], ['172.17.42.1/16'], [])
+        ('1', 'lo', ['LOOPBACK', 'UP', 'LOWER_UP'], ['127.0.0.1/8'], ['::1/128'], 'UNKNOWN'),
+        ('2', 'eth0', ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'], ['10.0.2.15/24', '10.0.2.16/24'], ['fe80::a00:27ff:feea:67cf/64'], 'UP'),
+        ('3', 'docker0', ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP'], ['172.17.42.1/16'], [], 'DOWN')
     ])
-    def test_device_discovery(self, id, name, flags, inet, inet6):
+    @mock.patch('pynetlib.models.execute_command')
+    def test_device_discovery(self, id, name, flags, inet, inet6, state, execute_command):
+        execute_command.return_value = self.ip_addr_list_output
         device = Device(id, name, flags=flags)
         device.inet = inet
         device.inet6 = inet6
+        device.state = state
 
-        with mock.patch('pynetlib.models.execute_command') as execute_command:
-            execute_command.return_value = self.ip_addr_list_output
-            devices = Device.discover()
+        devices = Device.discover()
 
         self.assertEqual(len(devices), 3)
         self.assertTrue(device in devices)
@@ -77,6 +79,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(found_device.flags, device.flags)
         self.assertEqual(found_device.inet, device.inet)
         self.assertEqual(found_device.inet6, device.inet6)
+        self.assertEqual(found_device.state, device.state)
 
     @parameterized.expand([
         ('1', 'lo', ['127.0.0.1/8'], ['::1/128']),
