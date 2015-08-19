@@ -1,12 +1,13 @@
 # pynetlib
 [![Build Status](https://travis-ci.org/migibert/pynetlib.svg?branch=master)](https://travis-ci.org/migibert/pynetlib)
 [![Coverage Status](https://coveralls.io/repos/migibert/pynetlib/badge.svg?branch=master&service=github)](https://coveralls.io/github/migibert/pynetlib?branch=master)
-[![PyPI version](https://badge.fury.io/py/pynetlib.svg)](http://badge.fury.io/py/pynetlib)
+[![Code Climate](https://codeclimate.com/github/migibert/pynetlib/badges/gpa.svg)](https://codeclimate.com/github/migibert/pynetlib)
+[![PyPI](https://img.shields.io/pypi/v/pynetlib.svg)](https://pypi.python.org/pypi/pynetlib)
 [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)  
 
-[![PyPI](https://img.shields.io/pypi/dm/pynetlib.svg)]()
-[![PyPI](https://img.shields.io/pypi/dw/pynetlib.svg)]()
-[![PyPI](https://img.shields.io/pypi/dd/pynetlib.svg)]()
+[![PyPI](https://img.shields.io/pypi/dm/pynetlib.svg)](https://pypi.python.org/pypi/pynetlib)
+[![PyPI](https://img.shields.io/pypi/dw/pynetlib.svg)](https://pypi.python.org/pypi/pynetlib)
+[![PyPI](https://img.shields.io/pypi/dd/pynetlib.svg)](https://pypi.python.org/pypi/pynetlib)
 
 ## Features
 This library is a wrapper around 'ip' command.
