@@ -35,16 +35,6 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev.name, name)
         self.assertTrue(dev.is_loopback())
 
-    @parameterized.expand([(['BROADCAST'], True), ([], False)])
-    def test_broadcast(self, flags, is_broadcast):
-        dev = Device('1', 'eth0', flags=flags)
-        self.assertEqual(dev.is_broadcast(), is_broadcast)
-
-    @parameterized.expand([(['MULTICAST'], True), ([], False)])
-    def test_multicast(self, flags, is_multicast):
-        dev = Device('1', 'eth0', flags=flags)
-        self.assertEqual(dev.is_multicast(), is_multicast)
-
     @parameterized.expand([
         (['UP'], (True, False, False, False)),
         (['LOWER_UP'], (False, False, False, False)),
