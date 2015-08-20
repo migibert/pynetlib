@@ -34,6 +34,13 @@ You can run tests from project's root with the following commands:
 
 Dependencies can be intalled using test-requirements.txt file : ```pip install -r test-requirements.txt```
 
+You may not want to play functional tests on your host as it changes eth2 configuration. If the device does not exist, tests will fail and, if it exists, it could break your device configuration (note that configurations are not persisted so a reboot will restore your host). 
+
+A better place to play these tests is on a virtual machine and this is why a Vagrantfile is available so you can work on your host and run ```vagrant up``` which will :
+- run a vm with virtualbox (so you need virtualbox to work this way)
+- install your development version
+- run functional tests
+
 Feel free to submit pull request!
 
 ##Roadmap

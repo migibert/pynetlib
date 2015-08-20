@@ -5,3 +5,4 @@ venv
 .coverage
 *.pyc
 *.egg-info/*
+.vagrant
