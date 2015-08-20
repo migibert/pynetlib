@@ -1,20 +1,17 @@
 from mock.mock import call
-import os
 import mock
 import unittest
+from . import read_file
 from nose_parameterized import parameterized
 from pynetlib.exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
 from pynetlib.models import Namespace, Device
-
-IP_ADDR_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_list')
-IP_NETNS_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_netns_list')
 
 
 class TestNamespace(unittest.TestCase):
 
     def setUp(self):
-        self.ip_addr_list_output = open(IP_ADDR_RESULT).read()
-        self.ip_netns_list_output = open(IP_NETNS_RESULT).read()
+        self.ip_addr_list_output = read_file('ip_addr_list')
+        self.ip_netns_list_output = read_file('ip_netns_list')
 
     @parameterized.expand([('mynamespace', False), ('', True)])
     def test_init(self, name, is_default):

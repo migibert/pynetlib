@@ -2,19 +2,17 @@ from nose_parameterized.parameterized import parameterized
 import os
 import mock
 import unittest
+from . import read_file
 from nose_parameterized import parameterized
 from pynetlib.models import Namespace, Device
 from pynetlib.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
-
-IP_ADDR_LIST_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_list')
-IP_ADDR_SHOW_RESULT = os.path.join(os.path.dirname(__file__) + '/fixtures', 'ip_addr_show')
 
 
 class TestDevice(unittest.TestCase):
 
     def setUp(self):
-        self.ip_addr_list_output = open(IP_ADDR_LIST_RESULT).read()
-        self.ip_addr_show_output = open(IP_ADDR_SHOW_RESULT).read()
+        self.ip_addr_list_output = read_file('ip_addr_list')
+        self.ip_addr_show_output = read_file('ip_addr_show')
 
     def test_init_device(self):
         id = '1'
