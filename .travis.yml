@@ -1,12 +1,18 @@
 language: python
 python: 2.7
-
 install:
-  - pip install -r test-requirements.txt
-  - pip install coveralls
+- pip install -r test-requirements.txt
+- pip install coveralls
 script:
-  - py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing
+- py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing
 after_success:
-  - coveralls
-
+- coveralls
 sudo: false
+deploy:
+  provider: pypi
+  user: mgibert
+  password:
+    secure: m0E6nAD+cmvG0ykmUuzXvq9WN1LMygyNbfDTz0AgG51SESzQTz6VEKJO0hnTOlEZcKfTLJQgN/lXAwXMuXCdsy/vyoqQNxRqMkV6dqiotsY8GFT6VDqaWDj06IcYUrNPjOuAMy7mdXqLNTs7YE3kbVWBJvAAA5ojyhSND8rQq7Y0Fi2DP8ZRldoygOH+CkBrOufH8nMerJXApgqSS9TM7v1GZVIzx8H4KONegFLYK3WvsZDScUu8/OQG0+7AmSIoShPSsv7Q06oitnnw3IvV85U8CyixUI5/OL0gXkY78JU/bjfGKtG0DTx235X2gzWVymVoIXLPx8kgB7mNhLNDdhyJZv5SskcLY+I9kLsyx+NaOaQCsGx/lLNglo8k5Gdsi++Ht7Ww4eQxofr2vCtkNm4Aj/lvOSlHy4HrbSRMmsJ2Q88U+1QWrQyHKPXQJ/OnrpYJYHNwh8lFiaG0qYCMYvfOpBGqeXwTotT4SCKil2pkx3pUOvtLr8DAJFGSp2kXDhV+/a94Q8ue0wPUWMZZFnuuJ2itdOuJsIVF/7PhkeeVi6CpjhBQLk9fN4trKHS6U9xXaIYDqq/5A6Pyf4DBtwWExnoz77zO2qvTihvCw9j2QfCbIRc4qndaL3rKAkS9p3HO3wNPiOg9IU96lnoJPPxP+/eCcnf3rqrnR2gRAP0=
+  on:
+    tags: true
+    repo: migibert/pynetlib
