@@ -3,19 +3,16 @@ import os
 import fnmatch
 
 STANDARD_LOCATION = '/var/run/netns'
-
-
-def get_inode(pid):
-    return os.readlink('/proc/%s/ns/net' % pid)
+PROCESS_LOCATION = '/proc/%s/ns/net'
 
 
 def discover_external_namespaces():
     seen = []
     ns = []
-    baseinode = get_inode('1')
+    baseinode = os.readlink(PROCESS_LOCATION % '1')
     pidlist = fnmatch.filter(os.listdir('/proc/'), '[0123456789]*')
     for pid in pidlist:
-        inode = get_inode(pid)
+        inode = os.readlink(PROCESS_LOCATION % pid)
         if inode not in [None, '', baseinode, seen]:
             ns.append((pid, inode))
             seen.append(inode)
@@ -24,14 +21,14 @@ def discover_external_namespaces():
 
 def unify_external_namespaces():
     for pid, inode in discover_external_namespaces():
-        src = '/proc/%s/ns/net' % pid
+        src = PROCESS_LOCATION % pid
         dst = '%s/%s' % (STANDARD_LOCATION, inode)
         if not os.path.islink(dst):
             os.symlink(src, dst)
 
 
 def unify_internal_namespaces():
-    pattern = re.compile('^net\[(0-9)*]\]')
+    pattern = re.compile('^net:\[([0-9])*]$')
     internal_namespaces = [ns for ns in os.listdir(STANDARD_LOCATION) if pattern.match(ns)]
     external_namespaces = discover_external_namespaces()
 
@@ -40,12 +37,11 @@ def unify_internal_namespaces():
             if inode == internal_namespace:
                 break
         else:
-            os.unlink('%s/%s' % (STANDARD_LOCATION, inode))
+            os.unlink('%s/%s' % (STANDARD_LOCATION, internal_namespace))
 
 
 def unify():
+    if not os.path.exists(STANDARD_LOCATION):
+        os.mkdir(STANDARD_LOCATION)
     unify_internal_namespaces()
     unify_external_namespaces()
-
-
-# unify_external_namespaces()
