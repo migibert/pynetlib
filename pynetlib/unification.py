@@ -35,4 +35,4 @@ def unify_external_namespaces():
             os.symlink('/proc/%s/ns/net' % namespace['pid'], dst)
 
 
-unify_external_namespaces()
+# unify_external_namespaces()

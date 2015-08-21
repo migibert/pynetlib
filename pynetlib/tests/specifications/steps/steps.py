@@ -1,5 +1,6 @@
 from behave import given, when, then
-from pynetlib.models import Namespace, Device
+from pynetlib.device import Device
+from pynetlib.namespace import Namespace
 from pynetlib.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ForbiddenException
 
 

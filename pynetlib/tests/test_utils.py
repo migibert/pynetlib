@@ -1,7 +1,7 @@
 import mock
 import unittest
 from pynetlib.utils import execute_command, find_value
-from pynetlib.models import Namespace
+from pynetlib.namespace import Namespace
 from pynetlib.exceptions import ValueNotFoundException
 
 
