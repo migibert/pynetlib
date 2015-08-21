@@ -1,6 +1,6 @@
 from utils import execute_command
 from exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
-from unification import unify_external_namespaces
+from unification import unify
 
 
 class Namespace():
@@ -30,7 +30,7 @@ class Namespace():
 
     @staticmethod
     def discover():
-        # unify_external_namespaces()
+        unify()
         default = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         result = execute_command('ip netns list')
         namespaces = [default] + [Namespace(name) for name in result.split()]

@@ -26,9 +26,9 @@ class TestNamespace(unittest.TestCase):
         ns2 = Namespace(name)
         self.assertEqual(ns1, ns2)
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_namespace_discovery(self, execute_command):
-
+    def test_namespace_discovery(self, execute_command, unify):
         execute_command.return_value = self.ip_netns_list_output
         default_namespace = Namespace('')
         first_namespace = Namespace('first_namespace')
@@ -41,31 +41,35 @@ class TestNamespace(unittest.TestCase):
         self.assertTrue(first_namespace in namespaces)
         self.assertTrue(second_namespace in namespaces)
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_namespace_creation(self, execute_command):
+    def test_namespace_creation(self, execute_command, unify):
         namespace = Namespace('namespace')
         namespace.create()
         self.assertTrue(execute_command.call_count, 2)
         self.assertTrue(call('ip netns list') in execute_command.mock_calls)
         self.assertTrue(call('ip netns add namespace') in execute_command.mock_calls)
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_default_namespace_creation(self, execute_command):
+    def test_default_namespace_creation(self, execute_command, unify):
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         with self.assertRaises(ObjectAlreadyExistsException):
             namespace.create()
         execute_command.assert_not_called()
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_existing_namespace_creation(self, execute_command):
+    def test_existing_namespace_creation(self, execute_command, unify):
         execute_command.side_effect = ['namespace']
         namespace = Namespace('namespace')
         with self.assertRaises(ObjectAlreadyExistsException):
             namespace.create()
         execute_command.assert_called_once_with('ip netns list')
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_namespace_deletion(self, execute_command):
+    def test_namespace_deletion(self, execute_command, unify):
         execute_command.side_effect = ['namespace', None]
         namespace = Namespace('namespace')
         namespace.delete()
@@ -73,41 +77,49 @@ class TestNamespace(unittest.TestCase):
         self.assertTrue(call('ip netns list') in execute_command.mock_calls)
         self.assertTrue(call('ip netns del namespace') in execute_command.mock_calls)
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_default_namespace_deletion(self, execute_command):
+    def test_default_namespace_deletion(self, execute_command, unify):
         execute_command.side_effect = ['']
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         with self.assertRaises(ForbiddenException):
             namespace.delete()
         execute_command.assert_not_called()
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_non_existing_namespace_deletion(self, execute_command):
+    def test_non_existing_namespace_deletion(self, execute_command, unify):
         namespace = Namespace('namespace')
         with self.assertRaises(ObjectNotFoundException):
             namespace.delete()
         execute_command.assert_called_once_with('ip netns list')
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_namespace_existence(self, execute_command):
+    def test_namespace_existence(self, execute_command, unify):
         execute_command.side_effect = ['namespace']
         namespace = Namespace('namespace')
         result = namespace.exists()
         self.assertTrue(result)
+        unify.assert_called_once_with()
         execute_command.assert_called_once_with('ip netns list')
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_default_namespace_existence(self, execute_command):
+    def test_default_namespace_existence(self, execute_command, unify):
         namespace = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         result = namespace.exists()
         self.assertTrue(result)
+        unify.assert_called_once_with()
         execute_command.assert_called_once_with('ip netns list')
 
+    @mock.patch('pynetlib.namespace.unify')
     @mock.patch('pynetlib.namespace.execute_command')
-    def test_non_existing_namespace_existence(self, execute_command):
+    def test_non_existing_namespace_existence(self, execute_command, unify):
         namespace = Namespace('namespace')
         result = namespace.exists()
         self.assertFalse(result)
+        unify.assert_called_once_with()
         execute_command.assert_called_once_with('ip netns list')
 
 
