@@ -10,7 +10,7 @@
 [![PyPI](https://img.shields.io/pypi/dd/pynetlib.svg)](https://pypi.python.org/pypi/pynetlib)
 
 ## Features
-This library is a wrapper around 'ip' command.
+This library is a toolbox to manipulate network configurations on Linux.
 
 It supports:
 - namespace discovery via `ip netns list`
@@ -23,6 +23,10 @@ It supports:
 - device disability via `ip link set <DEVICE> down`
 
 Make sure to run the scripts using this library with a user that can perform these operations.
+
+## Namespaces
+We noticed that `ip netns` command only works with namespaces created with `ip netns add <namespace>` command. Namespaces created outside `ip` command (Docker, browsers, ...) are not manipulable this way.
+However, as each process namespace is listed in `/proc/<pid>/ns/net` and `ip netns` works with `/var/run/netns`, pynetlib will create symlinks to make external namespaces manipulable with `ip` command. If the namespace does not exist anymore (because there is no more process that work with it), the symlink will be removed.
 
 ## Installation
 pynetlib is available on Pypi so it can be installed with pip: `pip install pynetlib`
