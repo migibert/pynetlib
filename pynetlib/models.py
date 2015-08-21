@@ -1,6 +1,6 @@
 from utils import execute_command, find_value
 from exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
-
+from unification import unify_external_namespaces
 
 class Namespace():
     DEFAULT_NAMESPACE_NAME = ''
@@ -29,6 +29,7 @@ class Namespace():
 
     @staticmethod
     def discover(with_devices=False):
+        unify_external_namespaces()
         default = Namespace(Namespace.DEFAULT_NAMESPACE_NAME)
         result = execute_command('ip netns list')
         namespaces = [default] + [Namespace(name) for name in result.split()]
