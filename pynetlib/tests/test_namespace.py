@@ -13,12 +13,14 @@ class TestNamespace(unittest.TestCase):
         self.ip_addr_list_output = read_file('ip_addr_list')
         self.ip_netns_list_output = read_file('ip_netns_list')
 
-    @parameterized.expand([('mynamespace', False), ('', True)])
-    def test_init(self, name, is_default):
+    @parameterized.expand([('mynamespace', False, False), ('', True, False), ('net:[12345]', False, True)])
+    def test_init(self, name, is_default, is_external):
         ns = Namespace(name)
+        print ns.is_external()
         self.assertEqual(ns.name, name)
         self.assertEqual(len(ns.devices), 0)
         self.assertEqual(ns.is_default(), is_default)
+        self.assertEqual(ns.is_external(), is_external)
 
     def test_equality(self):
         name = 'namespace'

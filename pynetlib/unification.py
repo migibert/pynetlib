@@ -28,7 +28,7 @@ def unify_external_namespaces():
 
 
 def unify_internal_namespaces():
-    pattern = re.compile('^net:\[([0-9])*]$')
+    pattern = re.compile('^net:\[([0-9])*\]$')
     internal_namespaces = [ns for ns in os.listdir(STANDARD_LOCATION) if pattern.match(ns)]
     external_namespaces = discover_external_namespaces()
 
