@@ -1,6 +1,7 @@
 from utils import execute_command
 from exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
 from unification import unify
+import re
 
 
 class Namespace():
@@ -12,6 +13,10 @@ class Namespace():
 
     def is_default(self):
         return self.name == Namespace.DEFAULT_NAMESPACE_NAME
+
+    def is_external(self):
+        pattern = re.compile('^net:\[([0-9])*\]$')
+        return True if pattern.match(self.name) else False
 
     def exists(self):
         return self in Namespace.discover()
