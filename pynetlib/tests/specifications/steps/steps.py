@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import subprocess
 from behave import given, when, then
 from pynetlib.device import Device
