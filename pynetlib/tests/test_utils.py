@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import mock
 import unittest
 from pynetlib.utils import execute_command, find_value

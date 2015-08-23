@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from behave import given, when, then
 from pynetlib.device import Device
 from pynetlib.namespace import Namespace

@@ -1,5 +1,6 @@
-from utils import execute_command, find_value
-from exceptions import ObjectAlreadyExistsException, ObjectNotFoundException
+from __future__ import absolute_import
+from .utils import execute_command, find_value
+from .exceptions import ObjectAlreadyExistsException, ObjectNotFoundException
 
 
 class Device():
