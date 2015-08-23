@@ -1,11 +1,11 @@
 import mock
 import unittest
 from pynetlib.utils import execute_command, find_value
-from pynetlib.models import Namespace
+from pynetlib.namespace import Namespace
 from pynetlib.exceptions import ValueNotFoundException
 
 
-class TestNamespace(unittest.TestCase):
+class TestUtils(unittest.TestCase):
 
     @mock.patch('pynetlib.utils.subprocess.check_output')
     def test_execute_command(self, check_output):

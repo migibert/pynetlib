@@ -39,3 +39,11 @@ Feature: Manage namespace configurations
      Then discovered namespaces contains "namespace1"
      And discovered namespaces contains "namespace2"
      And discovered namespaces contains default namespace
+
+  Scenario: Manage namespaces unification
+     Given at least one docker container is running
+     When I discover namespaces
+     Then an external namespace exists
+     When I remove all docker containers
+     And I discover namespaces
+     Then no external namespace exists
