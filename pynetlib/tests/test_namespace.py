@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from mock.mock import call
 import mock
 import unittest
@@ -16,7 +17,6 @@ class TestNamespace(unittest.TestCase):
     @parameterized.expand([('mynamespace', False, False), ('', True, False), ('net:[12345]', False, True)])
     def test_init(self, name, is_default, is_external):
         ns = Namespace(name)
-        print ns.is_external()
         self.assertEqual(ns.name, name)
         self.assertEqual(len(ns.devices), 0)
         self.assertEqual(ns.is_default(), is_default)

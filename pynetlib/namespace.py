@@ -1,6 +1,7 @@
-from utils import execute_command
-from exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
-from unification import unify
+from __future__ import absolute_import
+from .utils import execute_command
+from .exceptions import ObjectAlreadyExistsException, ObjectNotFoundException, ForbiddenException
+from .unification import unify
 import re
 
 

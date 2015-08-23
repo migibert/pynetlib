@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from pynetlib.unification import unify, discover_external_namespaces, unify_external_namespaces, unify_internal_namespaces
 import mock
 import unittest
