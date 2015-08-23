@@ -1,3 +1,4 @@
+import subprocess
 from behave import given, when, then
 from pynetlib.device import Device
 from pynetlib.namespace import Namespace
@@ -58,6 +59,14 @@ def step_impl(context, device_name):
         if dev.name == device_name and not dev.is_down():
             dev.disable()
             context.device = dev
+
+
+@given(u'at least one docker container is running')
+def step_impl(context):
+    output = subprocess.check_output('docker ps', shell=True)
+    lines = [line for line in output.split('\n') if line]
+    if len(lines) <= 1:
+        subprocess.check_output('docker run -d -t progrium/busybox', shell=True)
 
 
 @when(u'I create a namespace "{namespace_name}"')
@@ -146,6 +155,11 @@ def step_impl(context, device_name):
         context.exception = e
 
 
+@when(u'I remove all docker containers')
+def step_impl(context):
+    subprocess.check_output('docker stop $(docker ps -a -q)', shell=True)
+
+
 @then(u'namespace "{namespace_name}" exists')
 def step_impl(context, namespace_name):
     namespace = Namespace(namespace_name)
@@ -204,6 +218,18 @@ def step_impl(context, device_name):
     device = context.device
     assert device.name == device_name
     assert device.is_up()
+
+
+@then(u'an external namespace exists')
+def step_impl(context):
+    external_namespaces = [ns for ns in context.discovered if ns.is_external()]
+    assert len(external_namespaces) > 0
+
+
+@then(u'no external namespace exists')
+def step_impl(context):
+    external_namespaces = [ns for ns in context.discovered if ns.is_external()]
+    assert len(external_namespaces) == 0
 
 
 @then(u'no exception is raised')
