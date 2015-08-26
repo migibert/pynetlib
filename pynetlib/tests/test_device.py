@@ -1,6 +1,4 @@
 from __future__ import absolute_import
-from nose_parameterized.parameterized import parameterized
-import os
 import mock
 import unittest
 from . import read_file
@@ -14,7 +12,6 @@ class TestDevice(unittest.TestCase):
 
     def setUp(self):
         self.ip_addr_list_output = read_file('ip_addr_list')
-        self.ip_addr_show_output = read_file('ip_addr_show')
 
     def test_init_device(self):
         id = '1'
