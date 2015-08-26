@@ -22,7 +22,8 @@ def get_devices_info(output):
         state = find_values_or_default_value(block, 'state', single=True, default_value='UNKNOWN')
         inet = find_values_or_default_value(block, 'inet', default_value=[])
         inet6 = find_values_or_default_value(block, 'inet6', default_value=[])
-        devices.append((id, name, flags, state, inet, inet6))
+        mtu = find_values_or_default_value(block, 'mtu', default_value=None, single=True)
+        devices.append((id, name, flags, state, inet, inet6, mtu))
     return devices
 
 

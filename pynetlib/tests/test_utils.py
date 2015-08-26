@@ -3,7 +3,7 @@ import mock
 import unittest
 from pynetlib.utils import execute_command, find_values_or_default_value
 from pynetlib.namespace import Namespace
-from pynetlib.exceptions import ValueNotFoundException
+from nose_parameterized import parameterized
 
 
 class TestUtils(unittest.TestCase):
@@ -36,22 +36,16 @@ class TestUtils(unittest.TestCase):
         value = find_values_or_default_value(values, 'key', single=True)
         self.assertEqual(value, 'value')
 
-    def test_find_values_non_existing_key(self):
-        values = 'key value'
-        value = find_values_or_default_value(values, 'test', single=True)
-        self.assertIsNone(value)
-
-    def test_find_values_non_existing_value(self):
-        values = 'key'
-        value = find_values_or_default_value(values, 'key', single=True)
-        self.assertIsNone(value)
-
-    def test_find_values_two_values(self):
-        values = 'key value key other'
-        values = find_values_or_default_value(values, 'key')
-        self.assertEqual(len(values), 2)
-        self.assertTrue('value' in values)
-        self.assertTrue('other' in values)
+    @parameterized.expand([
+        ('key value', 'key', True, None, 'value'),
+        ('', 'test', True, 'value', 'value'),
+        ('key', 'key', True, None, None),
+        ('key', 'key', True, 'test', 'test'),
+        ('key value1 key value2', 'key', False, None, ['value1', 'value2'])
+    ])
+    def test_find_values_or_default_value(self, values, key, single, default, expected):
+        value = find_values_or_default_value(values, key, single=single, default_value=default)
+        self.assertEqual(value, expected)
 
 
 if __name__ == '__main__':

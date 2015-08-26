@@ -12,6 +12,7 @@ class Device():
         self.state = None
         self.inet = []
         self.inet6 = []
+        self.mtu = None
 
     def is_loopback(self):
         return 'LOOPBACK' in self.flags
@@ -54,27 +55,25 @@ class Device():
             self.refresh()
 
     def refresh(self):
-        output = execute_command('ip addr show %s' % self.name, namespace=self.namespace)
-        device_infos = get_devices_info(output)
-        if len(device_infos) != 1:
-            raise Exception('Only one device can be named %s inside the same namespace' % self.name)
-        id, name, flags, state, inet, inet6 = device_infos[0]
-        self.id = id
-        self.name = name
-        self.flags = flags
-        self.state = state
-        self.inet = inet
-        self.inet6 = inet6
+        devices = Device.discover(namespace=self.namespace)
+        if self not in devices:
+            raise ObjectNotFoundException(self)
+        found = devices[devices.index(self)]
+        self.flags = found.flags
+        self.inet = found.inet
+        self.inet6 = found.inet6
+        self.mtu = found.mtu
 
     @staticmethod
     def discover(namespace=None):
         devices = []
         output = execute_command('ip addr list', namespace=namespace)
-        for id, name, flags, state, inet, inet6 in get_devices_info(output):
+        for id, name, flags, state, inet, inet6, mtu in get_devices_info(output):
             device = Device(id, name, flags=flags, namespace=namespace)
             device.state = state
             device.inet = inet
             device.inet6 = inet6
+            device.mtu = mtu
             devices.append(device)
         return devices
 
@@ -82,4 +81,4 @@ class Device():
         return self.name == other.name and self.id == other.id
 
     def __repr__(self):
-        return '<' + ','.join([self.id, self.name, str(self.inet), str(self.inet6)]) + '>'
+        return '<' + ','.join([self.id, self.name, str(self.inet), str(self.inet6), str(self.mtu)]) + '>'
