@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from .utils import execute_command, get_devices_info
 from .exceptions import ObjectAlreadyExistsException, ObjectNotFoundException
+import inspect
 
 
 class Device():
@@ -84,4 +85,7 @@ class Device():
         return self.name == other.name and self.id == other.id
 
     def __repr__(self):
-        return '<' + ','.join([self.id, self.name, str(self.inet), str(self.inet6), str(self.mtu)]) + '>'
+        members = inspect.getmembers(self, lambda a: not(inspect.isroutine(a)))
+        attributes = [a for a in members if '_' not in a[0]]
+        result = ', '.join(['%s=%s' % (key, value) for key, value in attributes])
+        return '<' + result + '>'
