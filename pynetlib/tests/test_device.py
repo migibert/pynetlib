@@ -24,6 +24,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev.inet6, [])
         self.assertIsNone(dev.state)
         self.assertIsNone(dev.mtu)
+        self.assertIsNone(dev.qlen)
 
     def test_init_loopback(self):
         id = '1'
@@ -57,17 +58,14 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev1, dev2)
 
     @parameterized.expand([
-        ('1', 'lo', ['LOOPBACK', 'UP', 'LOWER_UP'], ['127.0.0.1/8'], ['::1/128'], 'UNKNOWN'),
-        ('2', 'eth0', ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'], ['10.0.2.15/24', '10.0.2.16/24'], ['fe80::a00:27ff:feea:67cf/64'], 'UP'),
-        ('3', 'docker0', ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP'], ['172.17.42.1/16'], [], 'DOWN')
+        ('1', 'lo', ['LOOPBACK', 'UP', 'LOWER_UP'], ['127.0.0.1/8'], ['::1/128'], 'UNKNOWN', '65536', None),
+        ('2', 'eth0', ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'], ['10.0.2.15/24', '10.0.2.16/24'], ['fe80::a00:27ff:feea:67cf/64'], 'UP', '1500', '1000'),
+        ('3', 'docker0', ['NO-CARRIER', 'BROADCAST', 'MULTICAST', 'UP'], ['172.17.42.1/16'], [], 'DOWN', '1500', None)
     ])
     @mock.patch('pynetlib.device.execute_command')
-    def test_device_discovery(self, id, name, flags, inet, inet6, state, execute_command):
+    def test_device_discovery(self, id, name, flags, inet, inet6, state, mtu, qlen, execute_command):
         execute_command.return_value = self.ip_addr_list_output
         device = Device(id, name, flags=flags)
-        device.inet = inet
-        device.inet6 = inet6
-        device.state = state
 
         devices = Device.discover()
 
@@ -75,9 +73,11 @@ class TestDevice(unittest.TestCase):
         self.assertTrue(device in devices)
         found_device = devices[devices.index(device)]
         self.assertEqual(found_device.flags, device.flags)
-        self.assertEqual(found_device.inet, device.inet)
-        self.assertEqual(found_device.inet6, device.inet6)
-        self.assertEqual(found_device.state, device.state)
+        self.assertEqual(found_device.inet, inet)
+        self.assertEqual(found_device.inet6, inet6)
+        self.assertEqual(found_device.state, state)
+        self.assertEqual(found_device.mtu, mtu)
+        self.assertEqual(found_device.qlen, qlen)
 
     @parameterized.expand([
         ('1', 'lo', ['127.0.0.1/8'], ['::1/128']),
@@ -215,6 +215,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(device.inet, ['10.0.2.15/24', '10.0.2.16/24'])
         self.assertEqual(device.inet6, ['fe80::a00:27ff:feea:67cf/64'])
         self.assertEqual(device.mtu, '1500')
+        self.assertEqual(device.qlen, '1000')
         self.assertIsNone(device.namespace)
 
     @mock.patch('pynetlib.device.execute_command')
@@ -224,6 +225,3 @@ class TestDevice(unittest.TestCase):
         with self.assertRaises(ObjectNotFoundException):
             device.refresh()
             execute_command.assert_called_once_with("ip addr list", namespace=None)
-
-if __name__ == '__main__':
-    unittest.main()

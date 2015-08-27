@@ -58,7 +58,5 @@ Feel free to submit pull request!
 - Remove static route via `ip route del <DESTINATION>`
 - Add default gateway via `ip route add default via <GATEWAY>`
 - Get broadcast addresses from `ip addr list`
-- Get maximum transmission unit from `ip addr list`
-- Get the length of the transmit queue from `ip addr list` (qlen field)
 - Set the maximum transmission unit to device via `ip link set mtu <VALUE> dev <DEVICE>`
 - Set the length of the transmit queue via `ip link set txqueuelen <LENGTH> dev <DEVICE>`

@@ -46,7 +46,3 @@ class TestUtils(unittest.TestCase):
     def test_find_values_or_default_value(self, values, key, single, default, expected):
         value = find_values_or_default_value(values, key, single=single, default_value=default)
         self.assertEqual(value, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()
