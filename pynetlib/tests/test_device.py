@@ -1,6 +1,4 @@
 from __future__ import absolute_import
-from nose_parameterized.parameterized import parameterized
-import os
 import mock
 import unittest
 from . import read_file
@@ -14,7 +12,6 @@ class TestDevice(unittest.TestCase):
 
     def setUp(self):
         self.ip_addr_list_output = read_file('ip_addr_list')
-        self.ip_addr_show_output = read_file('ip_addr_show')
 
     def test_init_device(self):
         id = '1'
@@ -26,6 +23,7 @@ class TestDevice(unittest.TestCase):
         self.assertEqual(dev.inet, [])
         self.assertEqual(dev.inet6, [])
         self.assertIsNone(dev.state)
+        self.assertIsNone(dev.mtu)
 
     def test_init_loopback(self):
         id = '1'
@@ -207,17 +205,25 @@ class TestDevice(unittest.TestCase):
 
     @mock.patch('pynetlib.device.execute_command')
     def test_refresh_device(self, execute_command):
-        execute_command.return_value = self.ip_addr_show_output
-        device = Device('1', 'eth0', flags=[])
+        execute_command.return_value = self.ip_addr_list_output
+        device = Device('2', 'eth0', flags=[])
         device.refresh()
-        execute_command.assert_called_once_with("ip addr show eth0", namespace=None)
+        execute_command.assert_called_once_with("ip addr list", namespace=None)
         self.assertEqual(device.id, '2')
         self.assertEqual(device.name, "eth0")
         self.assertEqual(device.flags, ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'])
-        self.assertEqual(device.inet, ['10.0.2.15/24'])
+        self.assertEqual(device.inet, ['10.0.2.15/24', '10.0.2.16/24'])
         self.assertEqual(device.inet6, ['fe80::a00:27ff:feea:67cf/64'])
+        self.assertEqual(device.mtu, '1500')
         self.assertIsNone(device.namespace)
 
+    @mock.patch('pynetlib.device.execute_command')
+    def test_refresh_non_existing_device(self, execute_command):
+        execute_command.return_value = self.ip_addr_list_output
+        device = Device('id', 'device', flags=[])
+        with self.assertRaises(ObjectNotFoundException):
+            device.refresh()
+            execute_command.assert_called_once_with("ip addr list", namespace=None)
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from .utils import execute_command, find_value
+from .utils import execute_command, get_devices_info
 from .exceptions import ObjectAlreadyExistsException, ObjectNotFoundException
 
 
@@ -12,6 +12,7 @@ class Device():
         self.state = None
         self.inet = []
         self.inet6 = []
+        self.mtu = None
 
     def is_loopback(self):
         return 'LOOPBACK' in self.flags
@@ -54,53 +55,30 @@ class Device():
             self.refresh()
 
     def refresh(self):
-        output = execute_command('ip addr show %s' % self.name, namespace=self.namespace)
-        devices = Device.parse_output(output, namespace=self.namespace)
-        if len(devices) != 1:
-            raise Exception('Only one device can be named %s inside the same namespace' % self.name)
-        dev = devices[0]
-        self.id = dev.id
-        self.name = dev.name
-        self.flags = dev.flags
-        self.namespace = dev.namespace
-        self.state = dev.state
-        self.inet = dev.inet
-        self.inet6 = dev.inet6
+        devices = Device.discover(namespace=self.namespace)
+        if self not in devices:
+            raise ObjectNotFoundException(self)
+        found = devices[devices.index(self)]
+        self.flags = found.flags
+        self.inet = found.inet
+        self.inet6 = found.inet6
+        self.mtu = found.mtu
 
     @staticmethod
     def discover(namespace=None):
-        output = execute_command('ip addr list', namespace=namespace)
-        return Device.parse_output(output, namespace=namespace)
-
-    @staticmethod
-    def parse_output(output, namespace=None):
         devices = []
-        current_device = None
-        for block in output.split('\n'):
-            if block and block[0].isdigit():
-                if current_device:
-                    devices.append(current_device)
-                prefixes = block.split(':')
-                id = prefixes[0]
-                name = prefixes[1].strip()
-                flags = block[block.index('<') + 1:block.index('>')].split(',')
-                current_device = Device(id, name, flags=flags, namespace=namespace)
-            words = block.strip().split(' ')
-            state = find_value(words, 'state')
-            if state is not None:
-                current_device.state = state
-            inet = find_value(words, 'inet')
-            if inet is not None:
-                current_device.inet.append(inet)
-            inet6 = find_value(words, 'inet6')
-            if inet6 is not None:
-                current_device.inet6.append(inet6)
-        if current_device:
-            devices.append(current_device)
+        output = execute_command('ip addr list', namespace=namespace)
+        for id, name, flags, state, inet, inet6, mtu in get_devices_info(output):
+            device = Device(id, name, flags=flags, namespace=namespace)
+            device.state = state
+            device.inet = inet
+            device.inet6 = inet6
+            device.mtu = mtu
+            devices.append(device)
         return devices
 
     def __eq__(self, other):
         return self.name == other.name and self.id == other.id
 
     def __repr__(self):
-        return '<' + ','.join([self.id, self.name, str(self.inet), str(self.inet6)]) + '>'
+        return '<' + ','.join([self.id, self.name, str(self.inet), str(self.inet6), str(self.mtu)]) + '>'
