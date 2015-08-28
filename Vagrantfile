@@ -18,8 +18,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  config.vm.provision :shell, :inline => "apt-get update"
+  config.vm.provision :shell, :inline => "apt-get install -y docker.io && ln -sf /usr/bin/docker.io /usr/local/bin/docker"
   config.vm.provision :shell, :inline => "apt-get install -y python-pip"
+  config.vm.provision :shell, :inline => "pip install -r /vagrant/requirements.txt"
   config.vm.provision :shell, :inline => "pip install -r /vagrant/test-requirements.txt"
-  config.vm.provision :shell, :inline => "pip install -e /vagrant/pynetlib"
+  config.vm.provision :shell, :inline => "pip install -e /vagrant"
   config.vm.provision :shell, :inline => "behave /vagrant/pynetlib/tests/specifications"
 end
