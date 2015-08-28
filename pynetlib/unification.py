@@ -12,7 +12,10 @@ def discover_external_namespaces():
     baseinode = os.readlink(PROCESS_LOCATION % '1')
     pidlist = fnmatch.filter(os.listdir('/proc/'), '[0123456789]*')
     for pid in pidlist:
-        inode = os.readlink(PROCESS_LOCATION % pid)
+        try:
+            inode = os.readlink(PROCESS_LOCATION % pid)
+        except OSError:
+            continue
         if inode not in [None, '', baseinode, seen]:
             ns.append((pid, inode))
             seen.append(inode)

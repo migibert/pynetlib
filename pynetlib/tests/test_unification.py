@@ -83,3 +83,12 @@ class TestUnification(unittest.TestCase):
         ns = discover_external_namespaces()
         self.assertFalse(('1', 'net:[4026531956]') in ns)
         self.assertTrue(('2', 'net:[12345]') in ns)
+
+    @mock.patch('fnmatch.filter')
+    @mock.patch('os.readlink')
+    def test_discover_external_namespaces_error(self, readlink, filter):
+        readlink.side_effect = ['net:[4026531956]', OSError()]
+        filter.return_value = ['1']
+        ns = discover_external_namespaces()
+        self.assertFalse(('1', 'net:[4026531956]') in ns)
+        self.assertEqual([], ns)
