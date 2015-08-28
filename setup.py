@@ -9,7 +9,7 @@ dependencies = [str(ir.req) for ir in install_reqs]
 
 setup(
     name='pynetlib',
-    version='0.1.2',
+    version='0.1.3',
     url='https://github.com/migibert/pynetlib',
     license='MIT',
     author='Mikael Gibert',
