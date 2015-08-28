@@ -123,7 +123,3 @@ class TestNamespace(unittest.TestCase):
         self.assertFalse(result)
         unify.assert_called_once_with()
         execute_command.assert_called_once_with('ip netns list')
-
-
-if __name__ == '__main__':
-    unittest.main()

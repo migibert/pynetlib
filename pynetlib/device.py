@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from .utils import execute_command, get_devices_info
 from .exceptions import ObjectAlreadyExistsException, ObjectNotFoundException
+import inspect
 
 
 class Device():
@@ -13,6 +14,7 @@ class Device():
         self.inet = []
         self.inet6 = []
         self.mtu = None
+        self.qlen = None
 
     def is_loopback(self):
         return 'LOOPBACK' in self.flags
@@ -63,17 +65,19 @@ class Device():
         self.inet = found.inet
         self.inet6 = found.inet6
         self.mtu = found.mtu
+        self.qlen = found.qlen
 
     @staticmethod
     def discover(namespace=None):
         devices = []
         output = execute_command('ip addr list', namespace=namespace)
-        for id, name, flags, state, inet, inet6, mtu in get_devices_info(output):
+        for id, name, flags, state, inet, inet6, mtu, qlen in get_devices_info(output):
             device = Device(id, name, flags=flags, namespace=namespace)
             device.state = state
             device.inet = inet
             device.inet6 = inet6
             device.mtu = mtu
+            device.qlen = qlen
             devices.append(device)
         return devices
 
@@ -81,4 +85,7 @@ class Device():
         return self.name == other.name and self.id == other.id
 
     def __repr__(self):
-        return '<' + ','.join([self.id, self.name, str(self.inet), str(self.inet6), str(self.mtu)]) + '>'
+        members = inspect.getmembers(self, lambda a: not(inspect.isroutine(a)))
+        attributes = [a for a in members if '_' not in a[0]]
+        result = ', '.join(['%s=%s' % (key, value) for key, value in attributes])
+        return '<' + result + '>'
