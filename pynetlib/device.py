@@ -15,6 +15,7 @@ class Device():
         self.inet6 = []
         self.mtu = None
         self.qlen = None
+        self.qdisc = None
 
     def is_loopback(self):
         return 'LOOPBACK' in self.flags
@@ -66,18 +67,20 @@ class Device():
         self.inet6 = found.inet6
         self.mtu = found.mtu
         self.qlen = found.qlen
+        self.qdisc = found.qdisc
 
     @staticmethod
     def discover(namespace=None):
         devices = []
         output = execute_command('ip addr list', namespace=namespace)
-        for id, name, flags, state, inet, inet6, mtu, qlen in get_devices_info(output):
+        for id, name, flags, state, inet, inet6, mtu, qlen, qdisc in get_devices_info(output):
             device = Device(id, name, flags=flags, namespace=namespace)
             device.state = state
             device.inet = inet
             device.inet6 = inet6
             device.mtu = mtu
             device.qlen = qlen
+            device.qdisc = qdisc
             devices.append(device)
         return devices
 

@@ -24,7 +24,8 @@ def get_devices_info(output):
         inet6 = find_values_or_default_value(block, 'inet6', default_value=[])
         mtu = find_values_or_default_value(block, 'mtu', default_value=None, single=True)
         qlen = find_values_or_default_value(block, 'qlen', default_value=None, single=True)
-        devices.append((id, name, flags, state, inet, inet6, mtu, qlen))
+        qdisc = find_values_or_default_value(block, 'qdisc', default_value=None, single=True)
+        devices.append((id, name, flags, state, inet, inet6, mtu, qlen, qdisc))
     return devices
 
 
