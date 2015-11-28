@@ -38,7 +38,7 @@ pynetlib is available on Pypi so it can be installed with pip: `pip install pyne
 
 ## Development
 You can run tests from project's root with the following commands:
-- unit tests : ```py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing```
+- unit tests : ```py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing``` or just ```py.test``` as this configuration is already set by default.
 - functional tests : ```behave pynetlib/tests/specifications```
 
 Dependencies can be intalled using test-requirements.txt file : ```pip install -r test-requirements.txt```
