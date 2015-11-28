@@ -8,7 +8,7 @@ install:
 - pip install -r test-requirements.txt
 - pip install coveralls
 script:
-- py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing
+- py.test
 after_success:
 - coveralls
 sudo: false
