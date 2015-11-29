@@ -21,6 +21,7 @@ It supports:
 - address deletion via `ip addr del <address> dev <device>`
 - device ability via `ip link set <DEVICE> up`
 - device disability via `ip link set <DEVICE> down`
+- route discovery via `ip route list`
 
 Make sure to run the scripts using this library with a user that can perform these operations.
 
@@ -53,7 +54,6 @@ A better place to play these tests is on a virtual machine and this is why a Vag
 Feel free to submit pull request!
 
 ##Roadmap
-- List routes via `ip route show`
 - Add static route via `ip route add <DESTINATION> via <GATEWAY> dev <DEVICE>`
 - Remove static route via `ip route del <DESTINATION>`
 - Add default gateway via `ip route add default via <GATEWAY>`
