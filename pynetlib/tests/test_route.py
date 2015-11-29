@@ -4,7 +4,7 @@ import unittest
 from . import read_file
 from nose_parameterized import parameterized
 from pynetlib.route import Route
-from pynetlib.exceptions import ObjectNotFoundException
+from pynetlib.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 
 
 class TestRoute(unittest.TestCase):
@@ -60,6 +60,48 @@ class TestRoute(unittest.TestCase):
         with self.assertRaises(ObjectNotFoundException):
             route.refresh()
             execute_command.assert_called_once_with("ip route list", namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_contains_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('default', 'wlo1')
+        route.gateway = '192.168.0.254'
+        self.assertTrue(route.exists())
+        execute_command.assert_called_once_with('ip route list', namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_add_existing_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('default', 'wlo1')
+        route.gateway = '192.168.0.254'
+        with self.assertRaises(ObjectAlreadyExistsException):
+            route.create()
+            execute_command.assert_called_once_with('ip route list', namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_add_non_existing_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('1.2.3.4', 'wlo1')
+        route.gateway = '192.168.0.254'
+        route.create()
+        execute_command.assert_called_with('ip route add 1.2.3.4 dev wlo1 via 192.168.0.254', namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_delete_existing_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('default', 'wlo1')
+        route.gateway = '192.168.0.254'
+        route.delete()
+        execute_command.assert_called_with('ip route del default', namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_delete_non_existing_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('1.2.3.4', 'wlo1')
+        route.gateway = '192.168.0.254'
+        with self.assertRaises(ObjectNotFoundException):
+            route.delete()
+            execute_command.assert_called_with('ip route del 1.2.3.4', namespace=None)
 
     def deep_equality(self, expected, actual):
         return expected.destination == actual.destination \

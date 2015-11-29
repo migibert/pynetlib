@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from .utils import execute_command, get_routes_info
-from .exceptions import ObjectNotFoundException
+from .exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
 from . import NetworkBase
 
 
@@ -39,6 +39,21 @@ class Route(NetworkBase):
         self.gateway = found.gateway
         self.source = found.source
         self.scope = found.scope
+
+    def create(self):
+        if self.exists():
+            raise ObjectAlreadyExistsException(self)
+        gatewaycmd = '' if self.gateway is None else 'via %s' % self.gateway
+        cmd = 'ip route add %s dev %s %s' % (self.destination, self.device, gatewaycmd)
+        execute_command(cmd, namespace=self.namespace)
+
+    def delete(self):
+        if not self.exists():
+            raise ObjectNotFoundException(self)
+        execute_command('ip route del %s' % self.destination, namespace=self.namespace)
+
+    def exists(self):
+        return self in Route.discover(self.namespace)
 
     def __eq__(self, other):
         return self.destination == other.destination and self.device == other.device
