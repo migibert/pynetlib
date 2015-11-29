@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 import subprocess
 from behave import given, when, then
+from pynetlib.route import Route
 from pynetlib.device import Device
 from pynetlib.namespace import Namespace
 from pynetlib.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, ForbiddenException
@@ -161,6 +162,11 @@ def step_impl(context):
     subprocess.check_output('docker stop $(docker ps -a -q)', shell=True)
 
 
+@when(u'I discover routes')
+def step_impl(context):
+    context.routes = Route.discover()
+
+
 @then(u'namespace "{namespace_name}" exists')
 def step_impl(context, namespace_name):
     namespace = Namespace(namespace_name)
@@ -231,6 +237,16 @@ def step_impl(context):
 def step_impl(context):
     external_namespaces = [ns for ns in context.discovered if ns.is_external()]
     assert len(external_namespaces) == 0
+
+
+@then(u'"{route_destination}" is found in discovered routes')
+def step_impl(context, route_destination):
+    assert hasattr(context, 'routes')
+    found = False
+    for route in context.routes:
+        if route.destination == route.destination:
+            found = True
+    assert found
 
 
 @then(u'no exception is raised')

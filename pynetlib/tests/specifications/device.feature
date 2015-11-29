@@ -1,5 +1,5 @@
 Feature: Manage devices configurations
-  In order to dynamically configure machines network configuration
+  In order to dynamically configure machines network devices
   As a sysadmin or netadmin
   I want to manage devices configurations from python scripts
 

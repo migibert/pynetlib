@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 from .utils import execute_command, get_devices_info
 from .exceptions import ObjectAlreadyExistsException, ObjectNotFoundException
-import inspect
+from . import NetworkBase
 
 
-class Device():
+class Device(NetworkBase):
     def __init__(self, id, name, flags=[], namespace=None):
         self.id = id
         self.name = name
@@ -86,9 +86,3 @@ class Device():
 
     def __eq__(self, other):
         return self.name == other.name and self.id == other.id
-
-    def __repr__(self):
-        members = inspect.getmembers(self, lambda a: not(inspect.isroutine(a)))
-        attributes = [a for a in members if '_' not in a[0]]
-        result = ', '.join(['%s=%s' % (key, value) for key, value in attributes])
-        return '<' + result + '>'

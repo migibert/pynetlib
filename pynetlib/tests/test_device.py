@@ -212,7 +212,7 @@ class TestDevice(unittest.TestCase):
         device.refresh()
         execute_command.assert_called_once_with("ip addr list", namespace=None)
         self.assertEqual(device.id, '2')
-        self.assertEqual(device.name, "eth0")
+        self.assertEqual(device.name, 'eth0')
         self.assertEqual(device.flags, ['BROADCAST', 'MULTICAST', 'UP', 'LOWER_UP'])
         self.assertEqual(device.inet, ['10.0.2.15/24', '10.0.2.16/24'])
         self.assertEqual(device.inet6, ['fe80::a00:27ff:feea:67cf/64'])
