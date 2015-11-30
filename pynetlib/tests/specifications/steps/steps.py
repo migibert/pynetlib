@@ -71,6 +71,20 @@ def step_impl(context):
         subprocess.check_output('docker run -d -t progrium/busybox', shell=True)
 
 
+@given(u'route with destination "{destination}" on device "{device}" does not exist')
+def step_impl(context, destination, device):
+    route = Route(destination, device)
+    if route.exists():
+        route.delete()
+
+
+@given(u'route with destination "{destination}" on device "{device}" exists')
+def step_impl(context, destination, device):
+    route = Route(destination, device)
+    if route not in Route.discover():
+        route.create()
+
+
 @when(u'I create a namespace "{namespace_name}"')
 def step_impl(context, namespace_name):
     namespace = Namespace(namespace_name)
@@ -167,6 +181,15 @@ def step_impl(context):
     context.routes = Route.discover()
 
 
+@when(u'I add route with destination "{destination}" on device "{device}"')
+def step_impl(context, destination, device):
+    route = Route(destination, device)
+    try:
+        route.create()
+    except Exception as e:
+        context.exception = e
+
+
 @then(u'namespace "{namespace_name}" exists')
 def step_impl(context, namespace_name):
     namespace = Namespace(namespace_name)
@@ -247,6 +270,12 @@ def step_impl(context, route_destination):
         if route.destination == route.destination:
             found = True
     assert found
+
+
+@then(u'route with destination "{destination}" on device "{device}" exists')
+def step_impl(context, destination, device):
+    route = Route(destination, device)
+    assert route.exists()
 
 
 @then(u'no exception is raised')
