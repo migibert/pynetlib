@@ -19,9 +19,11 @@ It supports:
 - device discovery via `ip addr list`
 - address addition via `ip addr add <address> dev <device>`
 - address deletion via `ip addr del <address> dev <device>`
-- device ability via `ip link set <DEVICE> up`
-- device disability via `ip link set <DEVICE> down`
+- device ability via `ip link set <device> up`
+- device disability via `ip link set <device> down`
 - route discovery via `ip route list`
+- route creation via `ip route add <destination> dev <device> via <gateway>`
+- route deletion via `ip route del <destination>`
 
 Make sure to run the scripts using this library with a user that can perform these operations.
 
@@ -53,10 +55,5 @@ A better place to play these tests is on a virtual machine and this is why a Vag
 
 Feel free to submit pull request!
 
-##Roadmap
-- Add static route via `ip route add <DESTINATION> via <GATEWAY> dev <DEVICE>`
-- Remove static route via `ip route del <DESTINATION>`
-- Add default gateway via `ip route add default via <GATEWAY>`
-- Get broadcast addresses from `ip addr list`
-- Set the maximum transmission unit to device via `ip link set mtu <VALUE> dev <DEVICE>`
-- Set the length of the transmit queue via `ip link set txqueuelen <LENGTH> dev <DEVICE>`
+## Roadmap
+Pynetlib's roadmap is defined via github issues and milestones.
