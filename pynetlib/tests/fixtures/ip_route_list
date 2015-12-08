@@ -1,3 +1,4 @@
+unreachable 1.2.1.2/30
 prohibit 1.2.3.4/30
 default via 192.168.0.254 dev wlo1  proto static  metric 600
 169.254.0.0/16 dev docker0  scope link  metric 1000

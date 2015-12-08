@@ -36,3 +36,23 @@ Feature: Manage routes configurations
      Then route with destination "1.2.3.4/30" on device "eth2" exists
      And the route with destination "1.2.3.4/30" on device "eth2" is prohibited
      And no exception is raised
+
+    Scenario: Manage existing route prohibition
+     Given device "eth2" exists
+     And route with destination "1.2.3.4/30" on device "eth2" exists
+     When I prohibit route with destination "1.2.3.4/30" on device "eth2"
+     Then an ObjectAlreadyExistsException is raised
+
+    Scenario: Manage non existing route unreachable
+     Given device "eth2" exists
+     And route with destination "1.2.3.4/30" on device "eth2" does not exist
+     When I unreachable route with destination "1.2.3.4/30" on device "eth2"
+     Then route with destination "1.2.3.4/30" on device "eth2" exists
+     And the route with destination "1.2.3.4/30" on device "eth2" is unreachable
+     And no exception is raised
+
+    Scenario: Manage existing route unreachable
+     Given device "eth2" exists
+     And route with destination "1.2.3.4/30" on device "eth2" exists
+     When I unreachable route with destination "1.2.3.4/30" on device "eth2"
+     Then an ObjectAlreadyExistsException is raised
