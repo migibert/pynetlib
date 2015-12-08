@@ -22,14 +22,15 @@ class TestRoute(unittest.TestCase):
         self.assertIsNone(route.namespace)
 
     @parameterized.expand([
-        ('1.2.3.4/30', None, None, None, None, None, False, True),
-        ('default', 'wlo1', None, None, '600', '192.168.0.254', True, False),
-        ('169.254.0.0/16', 'docker0', 'link', None, '1000', None, False, False),
-        ('172.17.0.0/16', 'docker0', 'link', '172.17.0.1', None, None, False, False),
-        ('192.168.0.0/24', 'wlo1', 'link', '192.168.0.11', '600', None, False, False)
+        ('1.2.1.2/30', None, None, None, None, None, False, False, False),
+        ('1.2.3.4/30', None, None, None, None, None, False, True, True),
+        ('default', 'wlo1', None, None, '600', '192.168.0.254', True, False, True),
+        ('169.254.0.0/16', 'docker0', 'link', None, '1000', None, False, False, True),
+        ('172.17.0.0/16', 'docker0', 'link', '172.17.0.1', None, None, False, False, True),
+        ('192.168.0.0/24', 'wlo1', 'link', '192.168.0.11', '600', None, False, False, True)
     ])
     @mock.patch('pynetlib.route.execute_command')
-    def test_route_discovery(self, destination, device, scope, source, metric, gateway, default, prohibit, execute_command):
+    def test_route_discovery(self, destination, device, scope, source, metric, gateway, default, prohibit, reachable, execute_command):
         execute_command.return_value = self.ip_route_list_output
         route = Route(destination, device)
         route.scope = scope
@@ -37,11 +38,12 @@ class TestRoute(unittest.TestCase):
         route.gateway = gateway
         route.metric = metric
         routes = Route.discover()
-        self.assertEqual(len(routes), 5)
+        self.assertEqual(len(routes), 6)
         found_route = routes[routes.index(route)]
         self.assertTrue(self.deep_equality(route, found_route))
         self.assertEqual(found_route.is_default(), default)
         self.assertEqual(found_route.is_prohibited(), prohibit)
+        self.assertEqual(found_route.is_reachable(), reachable)
 
     @mock.patch('pynetlib.route.execute_command')
     def test_refresh_route(self, execute_command):
@@ -118,6 +120,21 @@ class TestRoute(unittest.TestCase):
         route = Route('1.2.3.4/30', None)
         with self.assertRaises(ObjectAlreadyExistsException):
             route.prohibit()
+            execute_command.assert_called_with('ip route del 1.2.3.4', namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_unreachable_non_existing_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('10.10.10.10/24', 'wlo1')
+        route.unreachable()
+        execute_command.assert_called_with('ip route add unreachable 10.10.10.10/24', namespace=None)
+
+    @mock.patch('pynetlib.route.execute_command')
+    def test_unreachable_existing_route(self, execute_command):
+        execute_command.return_value = self.ip_route_list_output
+        route = Route('1.2.3.4/30', None)
+        with self.assertRaises(ObjectAlreadyExistsException):
+            route.unreachable()
             execute_command.assert_called_with('ip route del 1.2.3.4', namespace=None)
 
     def deep_equality(self, expected, actual):

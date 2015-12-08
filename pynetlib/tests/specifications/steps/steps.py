@@ -199,6 +199,15 @@ def step_impl(context, destination, device):
         context.exception = e
 
 
+@when(u'I unreachable route with destination "{destination}" on device "{device}"')
+def step_impl(context, destination, device):
+    route = Route(destination, device)
+    try:
+        route.unreachable()
+    except Exception as e:
+        context.exception = e
+
+
 @then(u'namespace "{namespace_name}" exists')
 def step_impl(context, namespace_name):
     namespace = Namespace(namespace_name)
@@ -291,8 +300,14 @@ def step_impl(context, destination, device):
 def step_impl(context, destination, device):
     route = Route(destination, device)
     route.refresh()
-    print(route)
     assert route.is_prohibited()
+
+
+@then(u'the route with destination "{destination}" on device "{device}" is unreachable')
+def step_impl(context, destination, device):
+    route = Route(destination, device)
+    route.refresh()
+    assert not route.is_reachable()
 
 
 @then(u'no exception is raised')
