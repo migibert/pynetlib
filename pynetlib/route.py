@@ -12,21 +12,26 @@ class Route(NetworkBase):
         self.source = None
         self.scope = None
         self.metric = None
+        self.prohibited = False
         self.namespace = namespace
 
     def is_default(self):
         return self.destination == 'default'
 
+    def is_prohibited(self):
+        return self.prohibited
+
     @staticmethod
     def discover(namespace=None):
         routes = []
         output = execute_command('ip route list', namespace=namespace)
-        for destination, device, metric, scope, gateway, source in get_routes_info(output):
+        for destination, device, metric, scope, gateway, source, prohibited in get_routes_info(output):
             route = Route(destination, device, namespace=namespace)
             route.metric = metric
             route.gateway = gateway
             route.source = source
             route.scope = scope
+            route.prohibited = prohibited
             routes.append(route)
         return routes
 
@@ -39,6 +44,7 @@ class Route(NetworkBase):
         self.gateway = found.gateway
         self.source = found.source
         self.scope = found.scope
+        self.prohibited = found.prohibit
 
     def create(self):
         if self.exists():
@@ -52,8 +58,13 @@ class Route(NetworkBase):
             raise ObjectNotFoundException(self)
         execute_command('ip route del %s' % self.destination, namespace=self.namespace)
 
+    def prohibit(self):
+        if self.exists():
+            raise ObjectAlreadyExistsException(self)
+        execute_command('ip route add prohibit %s' % self.destination, namespace=self.namespace)
+
     def exists(self):
         return self in Route.discover(self.namespace)
 
     def __eq__(self, other):
-        return self.destination == other.destination and self.device == other.device
+        return self.destination == other.destination
