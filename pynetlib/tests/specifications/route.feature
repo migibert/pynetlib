@@ -28,3 +28,11 @@ Feature: Manage routes configurations
      And route with destination "1.2.3.4/30" on device "eth2" exists
      When I add route with destination "1.2.3.4/30" on device "eth2"
      Then an ObjectAlreadyExistsException is raised
+
+    Scenario: Manage non existing route prohibition
+     Given device "eth2" exists
+     And route with destination "1.2.3.4/30" on device "eth2" does not exist
+     When I prohibit route with destination "1.2.3.4/30" on device "eth2"
+     Then route with destination "1.2.3.4/30" on device "eth2" exists
+     And the route with destination "1.2.3.4/30" on device "eth2" is prohibited
+     And no exception is raised

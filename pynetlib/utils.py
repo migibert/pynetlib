@@ -16,15 +16,17 @@ def execute_command(command, namespace=None):
 
 def get_routes_info(output):
     routes = []
-    blocks = parse_output(output)
+    blocks = output.split('\n')
     for block in blocks:
-        destination = block.split(' ')[0]
+        values = block.split(' ')
+        prohibited = 'prohibit' in values
+        destination = values[1] if prohibited else values[0]
         gateway = find_values_or_default_value(block, 'via', default_value=None, single=True)
         metric = find_values_or_default_value(block, 'metric', default_value=None, single=True)
         scope = find_values_or_default_value(block, 'scope', default_value=None, single=True)
         device = find_values_or_default_value(block, 'dev', default_value=None, single=True)
         source = find_values_or_default_value(block, 'src', default_value=None, single=True)
-        routes.append((destination, device, metric, scope, gateway, source))
+        routes.append((destination, device, metric, scope, gateway, source, prohibited))
     return routes
 
 
