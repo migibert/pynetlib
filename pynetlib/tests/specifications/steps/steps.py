@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import subprocess
+import os
 from behave import given, when, then
 from pynetlib.route import Route
 from pynetlib.device import Device
@@ -301,6 +302,12 @@ def step_impl(context, destination, device):
     route = Route(destination, device)
     route.refresh()
     assert route.is_prohibited()
+    response = None
+    try:
+        response = os.system('ping -c 1 %s  2>/dev/null' % destination.split('/')[0])
+    except:
+        assert response == 2
+    assert response is not None
 
 
 @then(u'the route with destination "{destination}" on device "{device}" is unreachable')
@@ -308,6 +315,12 @@ def step_impl(context, destination, device):
     route = Route(destination, device)
     route.refresh()
     assert not route.is_reachable()
+    response = None
+    try:
+        response = os.system('ping -c 1 %s  2>/dev/null' % destination.split('/')[0])
+    except:
+        assert response == 2
+    assert response is not None
 
 
 @then(u'no exception is raised')
