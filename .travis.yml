@@ -1,17 +1,28 @@
+sudo: required
 language: python
 python:
 - 2.7
 - 3.2
 - 3.3
 - 3.4
+services:
+- docker
 install:
+- pip install virtualenv
+- virtualenv venv
+- source venv/bin/activate
 - pip install -r test-requirements.txt
 - pip install coveralls
+before_script:
+- sudo ip link add name eth1 type bridge
+- sudo ip link add name eth2 type bridge
+- sudo ip addr add 192.168.100.100 dev eth1
+- sudo ip addr add 172.17.100.100 dev eth2
 script:
 - py.test pynetlib --pep8 --cov=pynetlib --cov-report term-missing
+- sudo venv/bin/behave pynetlib/tests/specifications
 after_success:
 - coveralls
-sudo: false
 deploy:
   provider: pypi
   user: mgibert

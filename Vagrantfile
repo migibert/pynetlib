@@ -8,9 +8,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-14.04-amd64-vbox.box"
 
   config.vm.define "pynetlib" do |pynetlib|
-    pynetlib.vm.network "private_network", ip: "192.168.100.100"
-    pynetlib.vm.network "private_network", ip: "172.17.100.100"
-
     pynetlib.vm.provider :virtualbox do |vb|
       vb.name = "pynetlib"
       vb.customize ["modifyvm", :id, "--cpus", "1"]
@@ -18,6 +15,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
+  config.vm.provision :shell, :inline => "sudo ip link add name eth1 type bridge"
+  config.vm.provision :shell, :inline => "sudo ip link add name eth2 type bridge"
+  config.vm.provision :shell, :inline => "sudo ip addr add 192.168.100.100 dev eth1"
+  config.vm.provision :shell, :inline => "sudo ip addr add 172.17.100.100 dev eth2"
   config.vm.provision :shell, :inline => "apt-get update"
   config.vm.provision :shell, :inline => "apt-get install -y docker.io && ln -sf /usr/bin/docker.io /usr/local/bin/docker"
   config.vm.provision :shell, :inline => "apt-get install -y python-pip"
