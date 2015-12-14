@@ -16,7 +16,7 @@ def execute_command(command, namespace=None):
 
 def get_routes_info(output):
     routes = []
-    blocks = output.split('\n')
+    blocks = output.decode('utf-8').split('\n')
     for block in blocks:
         values = block.split(' ')
         prohibited = 'prohibit' in values
@@ -50,7 +50,7 @@ def parse_output(output):
     blocks = []
     current_block = ''
 
-    for line in output.split('\n'):
+    for line in output.decode('utf-8').split('\n'):
         if line and line[0].isdigit():
             if current_block:
                 blocks.append(current_block)

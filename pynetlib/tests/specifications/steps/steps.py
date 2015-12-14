@@ -67,7 +67,7 @@ def step_impl(context, device_name):
 @given(u'at least one docker container is running')
 def step_impl(context):
     output = subprocess.check_output('docker ps', shell=True)
-    lines = [line for line in output.split('\n') if line]
+    lines = [line for line in output.decode('utf-8').split('\n') if line]
     if len(lines) <= 1:
         subprocess.check_output('docker run -d -t progrium/busybox', shell=True)
 
