@@ -9,7 +9,7 @@ class Namespace():
     DEFAULT_NAMESPACE_NAME = ''
 
     def __init__(self, name):
-        self.name = name
+        self.name = name if type(name) == str else name.decode('utf-8')
         self.devices = []
 
     def is_default(self):
