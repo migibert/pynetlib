@@ -1,7 +1,7 @@
 behave==1.2.5
 mock==1.3.0
 pep8==1.6.2
-py==1.4.30
+py==1.10.0
 pytest==2.7.2
 pytest-cache==1.0
 pytest-pep8==1.0.6
